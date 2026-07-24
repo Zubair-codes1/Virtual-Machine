@@ -352,7 +352,18 @@ public class Analyser {
 
         TokenType op = binaryExpression.getOperator().type();
 
-        // Relational/Comparison operators return BOOLEAN
+        // handling logical operators
+        if (op == TokenType.LOGICAL_AND || op == TokenType.LOGICAL_OR) {
+            if (left != Type.BOOLEAN || right != Type.BOOLEAN) {
+                throw new SemanticException(
+                        "Semantic Error: Logical operations require boolean operands",
+                        binaryExpression.getLineNumber()
+                );
+            }
+            return Type.BOOLEAN;
+        }
+
+        // handling comparison operators
         if (op == TokenType.EQUAL_EQUAL || op == TokenType.NOT_EQUAL ||
                 op == TokenType.LESS_THAN || op == TokenType.GREATER_THAN ||
                 op == TokenType.LESS_OR_EQUAL || op == TokenType.GREATER_OR_EQUAL) {
@@ -365,15 +376,21 @@ public class Analyser {
             return Type.BOOLEAN;
         }
 
-        // Arithmetic operators return INT
-        if (left != Type.INT || right != Type.INT) {
-            throw new SemanticException(
-                    "Semantic Error: Arithmetic operations require integer operands",
-                    binaryExpression.getLineNumber()
-            );
+        // handling bitwise and arithmetic operators
+        if (op == TokenType.BITWISE_AND || op == TokenType.BITWISE_OR || op == TokenType.BITWISE_XOR ||
+                op == TokenType.PLUS || op == TokenType.MINUS ||
+                op == TokenType.MULTIPLY || op == TokenType.DIVIDE || op == TokenType.MODULO) {
+
+            if (left != Type.INT || right != Type.INT) {
+                throw new SemanticException(
+                        "Semantic Error: Bitwise and arithmetic operations require integer operands",
+                        binaryExpression.getLineNumber()
+                );
+            }
+            return Type.INT;
         }
 
-        return Type.INT;
+        return Type.ERROR;
     }
 
     private Type analyseUnaryExpr(UnaryExpression unaryExpression) {

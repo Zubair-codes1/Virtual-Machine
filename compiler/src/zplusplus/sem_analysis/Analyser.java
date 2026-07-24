@@ -2,6 +2,7 @@ package zplusplus.sem_analysis;
 
 import zplusplus.ast.*;
 import zplusplus.exceptions.SemanticException;
+import zplusplus.sem_analysis.symbol.FunctionSymbol;
 import zplusplus.sem_analysis.symbol.Symbol;
 import zplusplus.sem_analysis.symbol.VariableSymbol;
 
@@ -143,8 +144,6 @@ public class Analyser {
     }
 
     private void analyseFor(ForStatement forStatement) {
-        currentEnvironment = new Environment(currentEnvironment);
-
         Statement initializer = forStatement.getInitializer();
         if (initializer != null) {
             analyseStatement(initializer);
@@ -174,8 +173,6 @@ public class Analyser {
 
         analyseStatement(body);
         loopDepth--;
-
-        currentEnvironment = currentEnvironment.getParentEnvironment();
 
     }
 
@@ -234,12 +231,12 @@ public class Analyser {
         currentEnvironment = currentEnvironment.getParentEnvironment();
     }
 
-    private void analyseFuncDecl(FunctionDeclarationStatement functionDeclarationStatement) {
-        return;
+    private void analyseFuncDecl(FunctionDeclarationStatement statement) {
+
     }
 
     private void analysePrint(PrintStatement printStatement) {
-        return;
+
     }
 
     private Type analyseExpression(Expression expression) {
@@ -287,5 +284,27 @@ public class Analyser {
 
     private Type analyseGroupExpr(GroupingExpression groupingExpression) {
         return null;
+    }
+
+    private Type parseType(String typeName, int lineNumber) {
+        if (typeName == null) {
+            return Type.VOID;
+        }
+
+        switch (typeName.trim().toLowerCase()) {
+            case "int":
+                return Type.INT;
+            case "string":
+                return Type.STRING;
+            case "bool":
+                return Type.BOOLEAN;
+            case "void":
+                return Type.VOID;
+            default:
+                throw new SemanticException(
+                        "Semantic Error: Unknown or unsupported type '" + typeName + "'",
+                        lineNumber
+                );
+        }
     }
 }

@@ -100,7 +100,6 @@ public class Analyser {
         }
 
         Symbol symbol = currentEnvironment.getSymbol(assignmentStatement.getName());
-        Type expressionType = analyseExpression(assignmentStatement.getExpression());
 
         if (symbol == null) {
             throw new SemanticException(
@@ -109,9 +108,19 @@ public class Analyser {
             );
         }
 
+        if (!(symbol instanceof VariableSymbol)) {
+            throw new SemanticException(
+                    "Semantic Error: Cannot assign value to function '" + assignmentStatement.getName() + "'",
+                    assignmentStatement.getLineNumber()
+            );
+        }
+
+        Type expressionType = analyseExpression(assignmentStatement.getExpression());
+
         if (symbol.getType() != expressionType) {
             throw new SemanticException(
-                    "Semantic Error: Not a valid assignment",
+                    "Semantic Error: Type mismatch in assignment to '" + assignmentStatement.getName() +
+                            "'. Expected " + symbol.getType() + " but got " + expressionType,
                     assignmentStatement.getLineNumber()
             );
         }

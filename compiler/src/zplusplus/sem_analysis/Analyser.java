@@ -339,9 +339,33 @@ public class Analyser {
     }
 
     private Type analyseBinExpr(BinaryExpression binaryExpression) {
-        if (analyseExpression(binaryExpression.getLeft()) != Type.INT
-                || analyseExpression(binaryExpression.getRight()) != Type.INT) {
-            return Type.ERROR;
+
+        Type left = analyseExpression(binaryExpression.getLeft());
+        Type right = analyseExpression(binaryExpression.getRight());
+
+        if (left == Type.ERROR || right == Type.ERROR) return Type.ERROR;
+
+        TokenType op = binaryExpression.getOperator().type();
+
+        // Relational/Comparison operators return BOOLEAN
+        if (op == TokenType.EQUAL_EQUAL || op == TokenType.NOT_EQUAL ||
+                op == TokenType.LESS_THAN || op == TokenType.GREATER_THAN ||
+                op == TokenType.LESS_OR_EQUAL || op == TokenType.GREATER_OR_EQUAL) {
+            if (left != right) {
+                throw new SemanticException(
+                        "Semantic Error: Cannot compare mismatched types " + left + " and " + right,
+                        binaryExpression.getLineNumber()
+                );
+            }
+            return Type.BOOLEAN;
+        }
+
+        // Arithmetic operators return INT
+        if (left != Type.INT || right != Type.INT) {
+            throw new SemanticException(
+                    "Semantic Error: Arithmetic operations require integer operands",
+                    binaryExpression.getLineNumber()
+            );
         }
 
         return Type.INT;

@@ -293,14 +293,11 @@ public class Analyser {
             // Adds parameters as VariableSymbols inside the function's scope
             List<Parameter> params = stmt.getParameters();
             for (int i = 0; i < params.size(); i++) {
-                Parameter param = params.get(i);
-                Type pType = paramTypes.get(i).getType();
-
-                VariableSymbol paramSymbol = new VariableSymbol(param.name(), pType);
+                VariableSymbol paramSymbol = paramTypes.get(i);
 
                 if (!currentEnvironment.addToTable(paramSymbol)) {
                     throw new SemanticException(
-                            "Semantic Error: Duplicate parameter name '" + param.name() + "'",
+                            "Semantic Error: Duplicate parameter name '" + paramSymbol.getName() + "'",
                             stmt.getLineNumber()
                     );
                 }

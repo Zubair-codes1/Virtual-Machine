@@ -264,6 +264,18 @@ public class ParserTest {
         assertEquals(2, rightCall.getArguments().size());
     }
 
+    @Test
+    public void testValidVoidReturnType() {
+        String input = "def void test() { return; }"; // 'void' is not a supported token type
+
+        List<Statement> statements = parser.parse(input);
+        assertNotNull(statements);
+        assertEquals(1, statements.size());
+
+        FunctionDeclarationStatement func = (FunctionDeclarationStatement) statements.getFirst();
+        assertEquals("void", func.getReturnType());
+    }
+
     // =========================================================================
     // DEFENSIVE ERROR & BOUNDARY COGNIZANCE TESTS
     // =========================================================================
@@ -286,15 +298,5 @@ public class ParserTest {
             parser.parse(input);
         });
         assertTrue(exception.getMessage().contains("Trailing comma in parameter list"));
-    }
-
-    @Test
-    public void testSyntaxErrorInvalidFunctionReturnType() {
-        String input = "def void test() { return; }"; // 'void' is not a supported token type
-
-        SyntaxException exception = assertThrows(SyntaxException.class, () -> {
-            parser.parse(input);
-        });
-        assertTrue(exception.getMessage().contains("Invalid function return type"));
     }
 }

@@ -376,6 +376,11 @@ public class Analyser {
             return Type.BOOLEAN;
         }
 
+        // handling string concatenation
+        if (op == TokenType.PLUS && left == Type.STRING && right == Type.STRING) {
+            return Type.STRING;
+        }
+
         // handling bitwise and arithmetic operators
         if (op == TokenType.BITWISE_AND || op == TokenType.BITWISE_OR || op == TokenType.BITWISE_XOR ||
                 op == TokenType.PLUS || op == TokenType.MINUS ||

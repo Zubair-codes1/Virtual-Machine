@@ -30,7 +30,7 @@ public class Environment {
      * @param symbol symbol instance
      */
     public boolean addToTable(Symbol symbol) {
-        if (table.containsKey(symbol.toString())) {
+        if (table.containsKey(symbol.getName())) {
             return false;
         }
         table.put(symbol.getName(), symbol);

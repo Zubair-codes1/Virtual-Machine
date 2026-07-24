@@ -156,15 +156,17 @@ public class Analyser {
             );
         }
 
-        loopDepth++;
-
         if (whileStatement.getBody() == null) {
             throw new SemanticException("Semantic Error: No AST node found for while body", whileStatement.getLineNumber());
         }
 
-        analyseStatement(whileStatement.getBody());
+        loopDepth++;
 
-        loopDepth--;
+        try {
+            analyseStatement(whileStatement.getBody());
+        }finally {
+            loopDepth--;
+        }
     }
 
     private void analyseFor(ForStatement forStatement) {

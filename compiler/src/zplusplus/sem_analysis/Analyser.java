@@ -6,6 +6,7 @@ import zplusplus.sem_analysis.symbol.FunctionSymbol;
 import zplusplus.sem_analysis.symbol.Symbol;
 import zplusplus.sem_analysis.symbol.VariableSymbol;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +19,7 @@ public class Analyser {
     private List<Statement> statements;
     private Environment currentEnvironment;
     private Type currentFunctionReturnType;
+    private int currentFunctionOffset = 0;
     private int loopDepth;
 
     /**
@@ -231,8 +233,61 @@ public class Analyser {
         currentEnvironment = currentEnvironment.getParentEnvironment();
     }
 
-    private void analyseFuncDecl(FunctionDeclarationStatement statement) {
+    private void analyseFuncDecl(FunctionDeclarationStatement stmt) {
+        Type returnType = parseType(stmt.getReturnType(), stmt.getLineNumber());
 
+        List<VariableSymbol> paramTypes = new ArrayList<>();
+        for (Parameter param : stmt.getParameters()) {
+            paramTypes.add(new VariableSymbol(param.name(), parseType(param.type(), stmt.getLineNumber())));
+        }
+
+        // increments the function offset counter
+        int offset = currentFunctionOffset++;
+
+        // creates function symbol
+        FunctionSymbol funcSymbol = new FunctionSymbol(
+                stmt.getName(),
+                returnType,
+                paramTypes,
+                offset
+        );
+
+        // checks the current environment if the function already is declared
+        if (!currentEnvironment.addToTable(funcSymbol)) {
+            throw new SemanticException(
+                    "Semantic Error: Function '" + stmt.getName() + "' is already declared",
+                    stmt.getLineNumber()
+            );
+        }
+
+        Type previousReturnType = currentFunctionReturnType;
+        currentFunctionReturnType = returnType;
+
+        currentEnvironment = new Environment(currentEnvironment);
+
+        try {
+            // Adds parameters as VariableSymbols inside the function's scope
+            List<Parameter> params = stmt.getParameters();
+            for (int i = 0; i < params.size(); i++) {
+                Parameter param = params.get(i);
+                Type pType = paramTypes.get(i).getType();
+
+                VariableSymbol paramSymbol = new VariableSymbol(param.name(), pType);
+
+                if (!currentEnvironment.addToTable(paramSymbol)) {
+                    throw new SemanticException(
+                            "Semantic Error: Duplicate parameter name '" + param.name() + "'",
+                            stmt.getLineNumber()
+                    );
+                }
+            }
+
+            analyseStatement(stmt.getBody());
+
+        } finally { // makes sure that environment reverts back to original
+            currentEnvironment = currentEnvironment.getParentEnvironment();
+            currentFunctionReturnType = previousReturnType;
+        }
     }
 
     private void analysePrint(PrintStatement printStatement) {

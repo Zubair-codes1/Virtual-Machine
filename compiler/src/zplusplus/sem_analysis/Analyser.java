@@ -394,22 +394,48 @@ public class Analyser {
     }
 
     private Type analyseUnaryExpr(UnaryExpression unaryExpression) {
-        if (
-                unaryExpression.getOperator().type() == TokenType.LOGICAL_NOT &&
-                        analyseExpression(unaryExpression.getRightExpression()) == Type.BOOLEAN
-        ) {
+        Type operandType = analyseExpression(unaryExpression.getRightExpression());
+
+        if (operandType == Type.ERROR) return Type.ERROR;
+
+        TokenType op = unaryExpression.getOperator().type();
+
+        // Logical NOT (!)
+        if (op == TokenType.LOGICAL_NOT) {
+            if (operandType != Type.BOOLEAN) {
+                throw new SemanticException(
+                        "Semantic Error: Logical NOT '!' requires a boolean operand",
+                        unaryExpression.getLineNumber()
+                );
+            }
             return Type.BOOLEAN;
         }
 
-        if (
-                unaryExpression.getOperator().type() == TokenType.MINUS &&
-                        analyseExpression(unaryExpression.getRightExpression()) == Type.INT
-        ) {
+        // Unary MINUS (-)
+        if (op == TokenType.MINUS) {
+            if (operandType != Type.INT) {
+                throw new SemanticException(
+                        "Semantic Error: Unary minus '-' requires an integer operand",
+                        unaryExpression.getLineNumber()
+                );
+            }
+            return Type.INT;
+        }
+
+        // Bitwise NOT (~)
+        if (op == TokenType.BITWISE_NOT) {
+            if (operandType != Type.INT) {
+                throw new SemanticException(
+                        "Semantic Error: Bitwise NOT '~' requires an integer operand",
+                        unaryExpression.getLineNumber()
+                );
+            }
             return Type.INT;
         }
 
         return Type.ERROR;
     }
+
 
     private Type analyseCallExpr(CallingExpression callingExpression) {
         Symbol symbol = currentEnvironment.getSymbol(callingExpression.getCallee());

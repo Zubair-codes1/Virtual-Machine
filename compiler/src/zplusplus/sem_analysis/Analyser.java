@@ -364,7 +364,7 @@ public class Analyser {
     }
 
     private Type analyseGroupExpr(GroupingExpression groupingExpression) {
-        return null;
+        return analyseExpression(groupingExpression.getExpression());
     }
 
     private Type parseType(String typeName, int lineNumber) {

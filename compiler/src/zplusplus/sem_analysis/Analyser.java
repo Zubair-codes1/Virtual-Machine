@@ -143,6 +143,39 @@ public class Analyser {
     }
 
     private void analyseFor(ForStatement forStatement) {
+        currentEnvironment = new Environment(currentEnvironment);
+
+        Statement initializer = forStatement.getInitializer();
+        if (initializer != null) {
+            analyseStatement(initializer);
+        }
+
+        Expression condition = forStatement.getCondition();
+        if (condition != null) {
+            if (analyseExpression(condition) != Type.BOOLEAN) {
+                throw new SemanticException(
+                        "Semantic Error: For loop condition must be of boolean type",
+                        forStatement.getLineNumber()
+                );
+            }
+        }
+
+        Statement increment = forStatement.getIncrement();
+        if (increment != null) {
+            analyseStatement(increment);
+        }
+
+        loopDepth++;
+
+        Statement body = forStatement.getBody();
+        if (body == null) {
+            throw new SemanticException("Semantic Error: No AST node found for body", forStatement.getLineNumber());
+        }
+
+        analyseStatement(body);
+        loopDepth--;
+
+        currentEnvironment = currentEnvironment.getParentEnvironment();
 
     }
 

@@ -70,19 +70,24 @@ public class Analyser {
     }
 
     private void analyseVarDecl(VariableDeclarationStatement varDeclStatement) {
-        if (varDeclStatement.getInitializer() != null) {
-            Type type = null;
-            switch (varDeclStatement.getTypeName()){
-                case "int" -> type = Type.INT;
-                case "bool" -> type = Type.BOOLEAN;
-                case "string" -> type = Type.STRING;
-                default -> throw new SemanticException("Semantic Error: Not a valid type", varDeclStatement.getLineNumber());
-            }
-            VariableSymbol variableSymbol = new VariableSymbol(varDeclStatement.getVarName(), type);
+        Type declaredType = parseType(varDeclStatement.getTypeName(), varDeclStatement.getLineNumber());
 
-            currentEnvironment.addToTable(variableSymbol);
-        }else {
-            throw new SemanticException("Semantic Error: Not a valid variable", varDeclStatement.getLineNumber());
+        if (varDeclStatement.getInitializer() != null) {
+            Type initType = analyseExpression(varDeclStatement.getInitializer());
+            if (declaredType != initType) {
+                throw new SemanticException(
+                        "Semantic Error: Cannot initialize variable of type " + declaredType + " with value of type " + initType,
+                        varDeclStatement.getLineNumber()
+                );
+            }
+        }
+
+        VariableSymbol variableSymbol = new VariableSymbol(varDeclStatement.getVarName(), declaredType);
+        if (!currentEnvironment.addToTable(variableSymbol)) {
+            throw new SemanticException(
+                    "Semantic Error: Variable '" + varDeclStatement.getVarName() + "' is already declared in this scope",
+                    varDeclStatement.getLineNumber()
+            );
         }
     }
 

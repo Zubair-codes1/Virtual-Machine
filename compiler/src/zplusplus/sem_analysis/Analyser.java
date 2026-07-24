@@ -2,7 +2,6 @@ package zplusplus.sem_analysis;
 
 import zplusplus.ast.*;
 import zplusplus.exceptions.SemanticException;
-import zplusplus.lexer.Token;
 import zplusplus.lexer.TokenType;
 import zplusplus.sem_analysis.symbol.FunctionSymbol;
 import zplusplus.sem_analysis.symbol.Symbol;
@@ -10,7 +9,6 @@ import zplusplus.sem_analysis.symbol.VariableSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Semantic analyser class. Checks the semantics for all statements
@@ -98,6 +96,13 @@ public class Analyser {
 
         Symbol symbol = currentEnvironment.getSymbol(assignmentStatement.getName());
         Type expressionType = analyseExpression(assignmentStatement.getExpression());
+
+        if (symbol == null) {
+            throw new SemanticException(
+                    "Semantic Error: Cannot assign to undeclared variable '" + assignmentStatement.getName() + "'",
+                    assignmentStatement.getLineNumber()
+            );
+        }
 
         if (symbol.getType() != expressionType) {
             throw new SemanticException(
@@ -216,7 +221,7 @@ public class Analyser {
     }
 
     private void analyseBreak(BreakStatement breakStatement) {
-        if (loopDepth <= 1) {
+        if (loopDepth <= 0) {
             throw new SemanticException(
                     "Semantic Error: Invalid break statement",
                     breakStatement.getLineNumber()
@@ -361,19 +366,30 @@ public class Analyser {
     }
 
     private Type analyseCallExpr(CallingExpression callingExpression) {
-        FunctionSymbol functionSymbol = (FunctionSymbol) currentEnvironment.getSymbol(callingExpression.getCallee());
+        Symbol symbol = currentEnvironment.getSymbol(callingExpression.getCallee());
 
-        if (functionSymbol == null) {
-            return Type.ERROR;
+        if (!(symbol instanceof FunctionSymbol functionSymbol)) {
+            throw new SemanticException(
+                    "Semantic Error: Symbol '" + callingExpression.getCallee() + "' is not a declared function",
+                    callingExpression.getLineNumber()
+            );
         }
 
         if (functionSymbol.getParameters().size() != callingExpression.getArguments().size()) {
-            return Type.ERROR;
+            throw new SemanticException(
+                    "Semantic Error: Function argument count mismatch for '" + callingExpression.getCallee() + "'",
+                    callingExpression.getLineNumber()
+            );
         }
 
         for (int i = 0; i < functionSymbol.getParameters().size(); i++) {
-            if (analyseExpression(callingExpression.getArguments().get(i)) != functionSymbol.getParameters().get(i).getType()) {
-                return Type.ERROR;
+            Type argType = analyseExpression(callingExpression.getArguments().get(i));
+            Type paramType = functionSymbol.getParameters().get(i).getType();
+            if (argType != paramType) {
+                throw new SemanticException(
+                        "Semantic Error: Type mismatch for argument " + i + " in function call",
+                        callingExpression.getLineNumber()
+                );
             }
         }
 

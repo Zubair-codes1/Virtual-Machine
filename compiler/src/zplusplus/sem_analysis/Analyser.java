@@ -2,6 +2,8 @@ package zplusplus.sem_analysis;
 
 import zplusplus.ast.*;
 import zplusplus.exceptions.SemanticException;
+import zplusplus.lexer.Token;
+import zplusplus.lexer.TokenType;
 import zplusplus.sem_analysis.symbol.FunctionSymbol;
 import zplusplus.sem_analysis.symbol.Symbol;
 import zplusplus.sem_analysis.symbol.VariableSymbol;
@@ -333,17 +335,28 @@ public class Analyser {
     private Type analyseBinExpr(BinaryExpression binaryExpression) {
         if (analyseExpression(binaryExpression.getLeft()) != Type.INT
                 || analyseExpression(binaryExpression.getRight()) != Type.INT) {
-            throw new SemanticException(
-                    "Semantic Error: Invalid binary expression, must be integer expressions",
-                    binaryExpression.getLineNumber()
-            );
+            return Type.ERROR;
         }
 
         return Type.INT;
     }
 
     private Type analyseUnaryExpr(UnaryExpression unaryExpression) {
-        return null;
+        if (
+                unaryExpression.getOperator().type() == TokenType.LOGICAL_NOT &&
+                        analyseExpression(unaryExpression.getRightExpression()) == Type.BOOLEAN
+        ) {
+            return Type.BOOLEAN;
+        }
+
+        if (
+                unaryExpression.getOperator().type() == TokenType.MINUS &&
+                        analyseExpression(unaryExpression.getRightExpression()) == Type.INT
+        ) {
+            return Type.INT;
+        }
+
+        return Type.ERROR;
     }
 
     private Type analyseCallExpr(CallingExpression callingExpression) {

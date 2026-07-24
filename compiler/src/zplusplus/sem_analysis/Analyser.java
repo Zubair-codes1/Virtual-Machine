@@ -290,7 +290,7 @@ public class Analyser {
         currentEnvironment = new Environment(currentEnvironment);
 
         try {
-            // Adds parameters as VariableSymbols inside the function's scope
+            // Add parameters to function scope
             List<Parameter> params = stmt.getParameters();
             for (int i = 0; i < params.size(); i++) {
                 VariableSymbol paramSymbol = paramTypes.get(i);
@@ -303,9 +303,17 @@ public class Analyser {
                 }
             }
 
-            analyseStatement(stmt.getBody());
+            // Analyses statements individually rather than blocks to prevent
+            // double nesting of environments
+            if (stmt.getBody() instanceof BlockStatement blockBody) {
+                for (Statement statement : blockBody.getStatements()) {
+                    analyseStatement(statement);
+                }
+            } else if (stmt.getBody() != null) {
+                analyseStatement(stmt.getBody());
+            }
 
-        } finally { // makes sure that environment reverts back to original
+        } finally {
             currentEnvironment = currentEnvironment.getParentEnvironment();
             currentFunctionReturnType = previousReturnType;
         }

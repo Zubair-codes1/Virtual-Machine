@@ -159,36 +159,36 @@ public class Analyser {
     }
 
     private void analyseFor(ForStatement forStatement) {
-        Statement initializer = forStatement.getInitializer();
-        if (initializer != null) {
-            analyseStatement(initializer);
-        }
-
-        Expression condition = forStatement.getCondition();
-        if (condition != null) {
-            if (analyseExpression(condition) != Type.BOOLEAN) {
-                throw new SemanticException(
-                        "Semantic Error: For loop condition must be of boolean type",
-                        forStatement.getLineNumber()
-                );
-            }
-        }
-
-        Statement increment = forStatement.getIncrement();
-        if (increment != null) {
-            analyseStatement(increment);
-        }
-
+        currentEnvironment = new Environment(currentEnvironment);
         loopDepth++;
 
-        Statement body = forStatement.getBody();
-        if (body == null) {
-            throw new SemanticException("Semantic Error: No AST node found for body", forStatement.getLineNumber());
+        try {
+            if (forStatement.getInitializer() != null) {
+                analyseStatement(forStatement.getInitializer());
+            }
+
+            if (forStatement.getCondition() != null) {
+                if (analyseExpression(forStatement.getCondition()) != Type.BOOLEAN) {
+                    throw new SemanticException(
+                            "Semantic Error: For loop condition must be of boolean type",
+                            forStatement.getLineNumber()
+                    );
+                }
+            }
+
+            if (forStatement.getIncrement() != null) {
+                analyseStatement(forStatement.getIncrement());
+            }
+
+            if (forStatement.getBody() == null) {
+                throw new SemanticException("Semantic Error: No AST node found for body", forStatement.getLineNumber());
+            }
+
+            analyseStatement(forStatement.getBody());
+        } finally {
+            loopDepth--;
+            currentEnvironment = currentEnvironment.getParentEnvironment();
         }
-
-        analyseStatement(body);
-        loopDepth--;
-
     }
 
     private void analyseReturn(ReturnStatement returnStatement) {

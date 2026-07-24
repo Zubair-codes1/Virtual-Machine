@@ -291,7 +291,12 @@ public class Analyser {
     }
 
     private void analysePrint(PrintStatement printStatement) {
-
+        if (analyseExpression(printStatement.getExpression()) != Type.STRING) {
+            throw new SemanticException(
+                    "Semantic Error: Invalid print statement, must be a string expression",
+                    printStatement.getLineNumber()
+            );
+        }
     }
 
     private Type analyseExpression(Expression expression) {
@@ -346,20 +351,15 @@ public class Analyser {
             return Type.VOID;
         }
 
-        switch (typeName.trim().toLowerCase()) {
-            case "int":
-                return Type.INT;
-            case "string":
-                return Type.STRING;
-            case "bool":
-                return Type.BOOLEAN;
-            case "void":
-                return Type.VOID;
-            default:
-                throw new SemanticException(
-                        "Semantic Error: Unknown or unsupported type '" + typeName + "'",
-                        lineNumber
-                );
-        }
+        return switch (typeName.trim().toLowerCase()) {
+            case "int" -> Type.INT;
+            case "string" -> Type.STRING;
+            case "bool" -> Type.BOOLEAN;
+            case "void" -> Type.VOID;
+            default -> throw new SemanticException(
+                    "Semantic Error: Unknown or unsupported type '" + typeName + "'",
+                    lineNumber
+            );
+        };
     }
 }

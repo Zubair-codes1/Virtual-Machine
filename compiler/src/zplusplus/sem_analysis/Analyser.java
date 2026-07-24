@@ -10,6 +10,7 @@ import zplusplus.sem_analysis.symbol.VariableSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Semantic analyser class. Checks the semantics for all statements
@@ -360,7 +361,23 @@ public class Analyser {
     }
 
     private Type analyseCallExpr(CallingExpression callingExpression) {
-        return null;
+        FunctionSymbol functionSymbol = (FunctionSymbol) currentEnvironment.getSymbol(callingExpression.getCallee());
+
+        if (functionSymbol == null) {
+            return Type.ERROR;
+        }
+
+        if (functionSymbol.getParameters().size() != callingExpression.getArguments().size()) {
+            return Type.ERROR;
+        }
+
+        for (int i = 0; i < functionSymbol.getParameters().size(); i++) {
+            if (analyseExpression(callingExpression.getArguments().get(i)) != functionSymbol.getParameters().get(i).getType()) {
+                return Type.ERROR;
+            }
+        }
+
+        return functionSymbol.getType();
     }
 
     private Type analyseGroupExpr(GroupingExpression groupingExpression) {

@@ -297,6 +297,7 @@ public class Lexer {
                 case "int": tokens.add(new Token(TokenType.INT_TYPE, stringResult, lineNumber)); break;
                 case "string": tokens.add(new Token(TokenType.STRING_TYPE, stringResult, lineNumber)); break;
                 case "bool": tokens.add(new Token(TokenType.BOOLEAN_TYPE, stringResult, lineNumber)); break;
+                case "void": tokens.add(new Token(TokenType.VOID_TYPE, stringResult, lineNumber)); break;
                 case "true": tokens.add(new Token(TokenType.TRUE, stringResult, lineNumber)); break;
                 case "false": tokens.add(new Token(TokenType.FALSE, stringResult, lineNumber)); break;
                 default: tokens.add(new Token(TokenType.IDENTIFIER, stringResult, lineNumber));

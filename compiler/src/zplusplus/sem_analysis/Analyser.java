@@ -72,6 +72,13 @@ public class Analyser {
     private void analyseVarDecl(VariableDeclarationStatement varDeclStatement) {
         Type declaredType = parseType(varDeclStatement.getTypeName(), varDeclStatement.getLineNumber());
 
+        if (declaredType == Type.VOID) {
+            throw new SemanticException(
+                    "Semantic Error: Variable '" + varDeclStatement.getVarName() + "' cannot be of type 'void'",
+                    varDeclStatement.getLineNumber()
+            );
+        }
+
         if (varDeclStatement.getInitializer() != null) {
             Type initType = analyseExpression(varDeclStatement.getInitializer());
             if (declaredType != initType) {
@@ -203,36 +210,35 @@ public class Analyser {
     }
 
     private void analyseReturn(ReturnStatement returnStatement) {
-
         if (currentFunctionReturnType == null) {
             throw new SemanticException(
-                    "Semantic Error: Not a valid function",
+                    "Semantic Error: 'return' statement outside of function scope",
                     returnStatement.getLineNumber()
             );
-        }
-
-        if (returnStatement.getReturnValue() == null) {
-            if (currentFunctionReturnType != Type.VOID) {
-                throw new SemanticException(
-                        "Semantic Error: Non-void function must return a value of type " + currentFunctionReturnType,
-                        returnStatement.getLineNumber()
-                );
-            }
-            return;
         }
 
         if (currentFunctionReturnType == Type.VOID) {
-            throw new SemanticException(
-                    "Semantic Error: Function return type is void but return value is non-void",
-                    returnStatement.getLineNumber()
-            );
-        }
+            if (returnStatement.getReturnValue() != null) {
+                throw new SemanticException(
+                        "Semantic Error: Void function cannot return a value",
+                        returnStatement.getLineNumber()
+                );
+            }
+        } else {
+            if (returnStatement.getReturnValue() == null) {
+                throw new SemanticException(
+                        "Semantic Error: Function must return a value of type " + currentFunctionReturnType,
+                        returnStatement.getLineNumber()
+                );
+            }
 
-        if (currentFunctionReturnType != analyseExpression(returnStatement.getReturnValue())) {
-            throw new SemanticException(
-                    "Semantic Error: Invalid return type at. Expected: " + currentFunctionReturnType,
-                    returnStatement.getLineNumber()
-            );
+            Type exprType = analyseExpression(returnStatement.getReturnValue());
+            if (exprType != Type.ERROR && exprType != currentFunctionReturnType) {
+                throw new SemanticException(
+                        "Semantic Error: Return type mismatch. Expected " + currentFunctionReturnType + " but got " + exprType,
+                        returnStatement.getLineNumber()
+                );
+            }
         }
     }
 
@@ -262,7 +268,16 @@ public class Analyser {
 
         List<VariableSymbol> paramTypes = new ArrayList<>();
         for (Parameter param : stmt.getParameters()) {
-            paramTypes.add(new VariableSymbol(param.name(), parseType(param.type(), stmt.getLineNumber())));
+            Type paramType = parseType(param.type(), stmt.getLineNumber());
+
+            if (paramType == Type.VOID) {
+                throw new SemanticException(
+                        "Semantic Error: Parameter '" + param.name() + "' cannot be of type 'void'",
+                        stmt.getLineNumber()
+                );
+            }
+
+            paramTypes.add(new VariableSymbol(param.name(), paramType));
         }
 
         // increments the function offset counter

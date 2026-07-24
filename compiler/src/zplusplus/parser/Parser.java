@@ -339,7 +339,8 @@ public class Parser {
         if (
                 returnType.type() != TokenType.INT_TYPE &&
                         returnType.type() != TokenType.STRING_TYPE &&
-                        returnType.type() != TokenType.BOOLEAN_TYPE
+                        returnType.type() != TokenType.BOOLEAN_TYPE &&
+                        returnType.type() != TokenType.VOID_TYPE
         ) {
             throw new SyntaxException("Syntax Error: Invalid function return type", funcDeclaration.lineNumber());
         }

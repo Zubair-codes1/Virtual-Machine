@@ -27,6 +27,7 @@ public enum TokenType {
     STRING_TYPE,
     INT_TYPE,
     BOOLEAN_TYPE,
+    VOID_TYPE,
 
     // literals
     INT,

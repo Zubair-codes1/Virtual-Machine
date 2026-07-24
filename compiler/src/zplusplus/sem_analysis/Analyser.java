@@ -331,7 +331,15 @@ public class Analyser {
     }
 
     private Type analyseBinExpr(BinaryExpression binaryExpression) {
-        return null;
+        if (analyseExpression(binaryExpression.getLeft()) != Type.INT
+                || analyseExpression(binaryExpression.getRight()) != Type.INT) {
+            throw new SemanticException(
+                    "Semantic Error: Invalid binary expression, must be integer expressions",
+                    binaryExpression.getLineNumber()
+            );
+        }
+
+        return Type.INT;
     }
 
     private Type analyseUnaryExpr(UnaryExpression unaryExpression) {

@@ -3,7 +3,6 @@ package zplusplus.sem_analysis;
 import java.util.HashMap;
 import java.util.Map;
 
-import zplusplus.exceptions.SemanticException;
 import zplusplus.sem_analysis.symbol.Symbol;
 
 /**
@@ -61,8 +60,29 @@ public class Environment {
         return parentEnvironment;
     }
 
+    /**
+     * Returns the symbol table
+     * @return symbol table
+     */
     public Map<String, Symbol> getTable() {
         return table;
+    }
+
+    /**
+     * Function to check whether a certain variable is
+     * a global or local variable,
+     *
+     * @param name name of symbol
+     * @return true if global or false if local
+     */
+    public boolean isGlobal(String name) {
+        if (table.containsKey(name)) {
+            return this.parentEnvironment == null;
+        }else if (parentEnvironment != null) {
+            return this.parentEnvironment.isGlobal(name);
+        }
+
+        return false;
     }
 
 }

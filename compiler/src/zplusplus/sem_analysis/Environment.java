@@ -61,4 +61,8 @@ public class Environment {
         return parentEnvironment;
     }
 
+    public Map<String, Symbol> getTable() {
+        return table;
+    }
+
 }

@@ -76,7 +76,7 @@ public class CodeGenerator {
         }else if (expression instanceof BinaryExpression binary) {
             generateBinaryExpression(binary, environment);
         }else if (expression instanceof UnaryExpression unary) {
-            generateUnaryExpression(unary);
+            generateUnaryExpression(unary, environment);
         }else if (expression instanceof GroupingExpression grouping) {
             generateGroupingExpression(grouping);
         }else if (expression instanceof CallingExpression calling) {
@@ -188,7 +188,23 @@ public class CodeGenerator {
         emitLabel(endLabel);
     }
 
-    private void generateUnaryExpression(UnaryExpression unary) {}
+    private void generateUnaryExpression(UnaryExpression unary, Environment environment) {
+        generateExpression(unary.getRightExpression(), environment);
+
+        switch (unary.getOperator().tokenValue()) {
+            case "~" -> emitInstruction("NOT", "");
+            case "!" -> {
+                emitInstruction("PUSH", "0");
+                emitInstruction("NOT", "");
+            }
+            case "-" -> {
+                // Transform -x into (0 - x)
+                emitInstruction("PUSH", "0");
+                emitInstruction("SWAP", "");
+                emitInstruction("SUB", "");
+            }
+        }
+    }
 
     private void generateGroupingExpression(GroupingExpression grouping) {}
 

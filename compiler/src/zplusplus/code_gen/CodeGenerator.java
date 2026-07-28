@@ -59,6 +59,6 @@ public class CodeGenerator {
     }
 
     private void emitInstruction(String instruction, String operand) {
-        assemblyString.append(instruction).append(" ").append(operand);
+        assemblyString.append("\t").append(instruction).append(" ").append(operand).append("\n");
     }
 }

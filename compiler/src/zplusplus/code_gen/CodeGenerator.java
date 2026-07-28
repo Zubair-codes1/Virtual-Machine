@@ -1,8 +1,6 @@
 package zplusplus.code_gen;
 
-import zplusplus.ast.Expression;
-import zplusplus.ast.Statement;
-import zplusplus.ast.VariableDeclarationStatement;
+import zplusplus.ast.*;
 import zplusplus.exceptions.CodeGenException;
 import zplusplus.sem_analysis.Environment;
 
@@ -45,19 +43,23 @@ public class CodeGenerator {
                 if (stmt.getInitializer() != null) {
                     generateExpression(stmt.getInitializer());
                 }else {
-                    emitDefaultValue(stmt.getTypeName(), stmt.getVarName());
+                    emitDefaultValue(stmt);
                 }
             }
         }
     }
 
-    private void emitDefaultValue(String typeName, String variableName) {
-        switch (typeName.toLowerCase()) {
+    private void emitDefaultValue(VariableDeclarationStatement statement) {
+        switch (statement.getTypeName().toLowerCase()) {
             case "int", "bool" -> emitInstruction("PUSH", "0");
             case "string" -> emitInstruction("PUSH_STR", "\"\"");
+            default -> throw new CodeGenException(
+                    "Code Generation Error: Invalid type: " + statement.getTypeName(),
+                    statement.getLineNumber()
+            );
         }
 
-        emitInstruction("STORE", variableName);
+        emitInstruction("STORE", statement.getVarName());
     }
 
     private void emitInstruction(String instruction, String operand) {
@@ -65,6 +67,32 @@ public class CodeGenerator {
     }
 
     private void generateExpression(Expression expression) {
-
+        if (expression instanceof LiteralExpression literal) {
+            generateLiteralExpression(literal);
+        }else if (expression instanceof VariableExpression variable) {
+            generateVariableExpression(variable);
+        }else if (expression instanceof BinaryExpression binary) {
+            generateBinaryExpression(binary);
+        }else if (expression instanceof UnaryExpression unary) {
+            generateUnaryExpression(unary);
+        }else if (expression instanceof GroupingExpression grouping) {
+            generateGroupingExpression(grouping);
+        }else if (expression instanceof CallingExpression calling) {
+            generateCallingExpression(calling);
+        }
     }
+
+    private void generateLiteralExpression(LiteralExpression literal) {}
+
+    private void generateVariableExpression(VariableExpression variable) {}
+
+    private void generateBinaryExpression(BinaryExpression binary) {}
+
+    private void generateUnaryExpression(UnaryExpression unary) {}
+
+    private void generateGroupingExpression(GroupingExpression grouping) {}
+
+    private void generateCallingExpression(CallingExpression calling) {}
+
+
 }

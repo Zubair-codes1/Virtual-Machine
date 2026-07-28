@@ -64,8 +64,21 @@ public class CodeGenerator {
         }
     }
 
+    /**
+     * emit instruction with operand
+     * @param instruction instruction
+     * @param operand operand
+     */
     private void emitInstruction(String instruction, String operand) {
         assemblyString.append("\t").append(instruction).append(" ").append(operand).append("\n");
+    }
+
+    /**
+     * Overridden emit instructino with no operand
+     * @param instruction instruction
+     */
+    private void emitInstruction(String instruction) {
+        assemblyString.append("\t").append(instruction).append("\n");
     }
 
     private void generateExpression(Expression expression, Environment environment) {
@@ -122,20 +135,20 @@ public class CodeGenerator {
 
 
             switch(operator.tokenValue()) {
-                case "+" -> emitInstruction("ADD" ,"");
-                case "-" -> emitInstruction("SUB" ,"");
-                case "*" -> emitInstruction("MULT" ,"");
-                case "/" -> emitInstruction("DIV" ,"");
-                case "%" -> emitInstruction("MOD" ,"");
-                case ">=" -> emitInstruction("GTE" ,"");
-                case "<=" -> emitInstruction("LTE" ,"");
-                case ">" -> emitInstruction("GT" ,"");
-                case "<" -> emitInstruction("LT" ,"");
-                case "==" -> emitInstruction("EQ" ,"");
-                case "!=" -> emitInstruction("NEQ" ,"");
-                case "&" -> emitInstruction("AND" ,"");
-                case "|" -> emitInstruction("OR" ,"");
-                case "^" -> emitInstruction("XOR" ,"");
+                case "+" -> emitInstruction("ADD");
+                case "-" -> emitInstruction("SUB");
+                case "*" -> emitInstruction("MULT");
+                case "/" -> emitInstruction("DIV");
+                case "%" -> emitInstruction("MOD");
+                case ">=" -> emitInstruction("GTE");
+                case "<=" -> emitInstruction("LTE");
+                case ">" -> emitInstruction("GT");
+                case "<" -> emitInstruction("LT");
+                case "==" -> emitInstruction("EQ");
+                case "!=" -> emitInstruction("NEQ");
+                case "&" -> emitInstruction("AND");
+                case "|" -> emitInstruction("OR");
+                case "^" -> emitInstruction("XOR");
                 default -> throw new CodeGenException(
                         "Code Generator Error: Invalid binary operator " + operator.tokenValue(),
                         binary.getLineNumber()
@@ -200,16 +213,16 @@ public class CodeGenerator {
         generateExpression(unary.getRightExpression(), environment);
 
         switch (unary.getOperator().tokenValue()) {
-            case "~" -> emitInstruction("NOT", "");
+            case "~" -> emitInstruction("NOT");
             case "!" -> {
                 emitInstruction("PUSH", "0");
-                emitInstruction("NOT", "");
+                emitInstruction("NEQ", "");
             }
             case "-" -> {
                 // Transform -x into (0 - x)
                 emitInstruction("PUSH", "0");
-                emitInstruction("SWAP", "");
-                emitInstruction("SUB", "");
+                emitInstruction("SWAP");
+                emitInstruction("SUB");
             }
         }
     }

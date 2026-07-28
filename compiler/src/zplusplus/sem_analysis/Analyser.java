@@ -89,6 +89,10 @@ public class Analyser {
             }
         }
 
+        if (!currentEnvironment.isGlobal(varDeclStatement.getVarName())) {
+            currentEnvironment.defineLocal(varDeclStatement.getVarName());
+        }
+
         VariableSymbol variableSymbol = new VariableSymbol(varDeclStatement.getVarName(), declaredType);
         if (!currentEnvironment.addToTable(variableSymbol)) {
             throw new SemanticException(

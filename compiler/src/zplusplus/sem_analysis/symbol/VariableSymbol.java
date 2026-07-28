@@ -8,18 +8,13 @@ import zplusplus.sem_analysis.Type;
  * @author Zubair Abdul Matin
  */
 public class VariableSymbol extends Symbol {
-
-    private int slot;
-
     /**
      * Variable Symbol constructor
      * @param name variable name
      * @param type variable type
      */
-    public VariableSymbol(String name, Type type, int slot) {
+    public VariableSymbol(String name, Type type) {
         super(name, type);
-
-        this.slot = slot;
     }
 
     /**

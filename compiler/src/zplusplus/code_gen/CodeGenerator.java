@@ -80,7 +80,7 @@ public class CodeGenerator {
         }else if (expression instanceof GroupingExpression grouping) {
             generateGroupingExpression(grouping);
         }else if (expression instanceof CallingExpression calling) {
-            generateCallingExpression(calling);
+            generateCallingExpression(calling, environment);
         }
     }
 
@@ -208,7 +208,15 @@ public class CodeGenerator {
 
     private void generateGroupingExpression(GroupingExpression grouping) {}
 
-    private void generateCallingExpression(CallingExpression calling) {}
+    private void generateCallingExpression(CallingExpression calling, Environment environment) {
+
+        for (Expression argument:  calling.getArguments()) {
+            generateExpression(argument, environment);
+        }
+
+        String functionLabel = ":" + calling.getCallee();
+        emitInstruction("CALL", functionLabel);
+    }
 
 
 }

@@ -110,32 +110,40 @@ public class CodeGenerator {
     }
 
     private void generateBinaryExpression(BinaryExpression binary, Environment environment) {
-        generateExpression(binary.getLeft(), environment);
-        generateExpression(binary.getRight(), environment);
-
         Token operator = binary.getOperator();
-        switch(operator.tokenValue()) {
-            case "+" -> emitInstruction("ADD" ,"");
-            case "-" -> emitInstruction("SUB" ,"");
-            case "*" -> emitInstruction("MULT" ,"");
-            case "/" -> emitInstruction("DIV" ,"");
-            case "%" -> emitInstruction("MOD" ,"");
-            case ">=" -> emitInstruction("GTE" ,"");
-            case "<=" -> emitInstruction("LTE" ,"");
-            case ">" -> emitInstruction("GT" ,"");
-            case "<" -> emitInstruction("LT" ,"");
-            case "==" -> emitInstruction("EQ" ,"");
-            case "!=" -> emitInstruction("NEQ" ,"");
-            case "&&" -> generateLogicalAnd(binary, environment);
-            case "||" -> generateLogicalOr(binary, environment);
-            case "&" -> emitInstruction("AND" ,"");
-            case "|" -> emitInstruction("OR" ,"");
-            case "^" -> emitInstruction("XOR" ,"");
-            default -> throw new CodeGenException(
-                    "Code Generator Error: Invalid binary operator " + operator.tokenValue(),
-                    binary.getLineNumber()
-            );
+
+        if (operator.tokenValue().equals("&&")) {
+            generateLogicalAnd(binary, environment);
+        }else if (operator.tokenValue().equals("||")) {
+            generateLogicalOr(binary, environment);
+        }else {
+            generateExpression(binary.getLeft(), environment);
+            generateExpression(binary.getRight(), environment);
+
+
+            switch(operator.tokenValue()) {
+                case "+" -> emitInstruction("ADD" ,"");
+                case "-" -> emitInstruction("SUB" ,"");
+                case "*" -> emitInstruction("MULT" ,"");
+                case "/" -> emitInstruction("DIV" ,"");
+                case "%" -> emitInstruction("MOD" ,"");
+                case ">=" -> emitInstruction("GTE" ,"");
+                case "<=" -> emitInstruction("LTE" ,"");
+                case ">" -> emitInstruction("GT" ,"");
+                case "<" -> emitInstruction("LT" ,"");
+                case "==" -> emitInstruction("EQ" ,"");
+                case "!=" -> emitInstruction("NEQ" ,"");
+                case "&" -> emitInstruction("AND" ,"");
+                case "|" -> emitInstruction("OR" ,"");
+                case "^" -> emitInstruction("XOR" ,"");
+                default -> throw new CodeGenException(
+                        "Code Generator Error: Invalid binary operator " + operator.tokenValue(),
+                        binary.getLineNumber()
+                );
+            }
         }
+
+
     }
 
     private String createUniqueLabel(String prefix) {

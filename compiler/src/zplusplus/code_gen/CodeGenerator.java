@@ -47,6 +47,8 @@ public class CodeGenerator {
                 }else {
                     emitDefaultValue(stmt);
                 }
+
+                emitInstruction("STORE", stmt.getVarName());
             }
         }
     }
@@ -60,8 +62,6 @@ public class CodeGenerator {
                     statement.getLineNumber()
             );
         }
-
-        emitInstruction("STORE", statement.getVarName());
     }
 
     private void emitInstruction(String instruction, String operand) {

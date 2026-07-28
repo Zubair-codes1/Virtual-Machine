@@ -146,7 +146,28 @@ public class CodeGenerator {
         assemblyString.append(labelName).append(":\n");
     }
 
-    private void generateLogicalAnd(BinaryExpression binary, Environment environment) {}
+    private void generateLogicalAnd(BinaryExpression expr, Environment env) {
+        String falseLabel = createUniqueLabel("and_false");
+        String endLabel = createUniqueLabel("and_end");
+
+        // Evaluate Left
+        generateExpression(expr.getLeft(), env);
+        emitInstruction("JIF", falseLabel);
+
+        // Evaluate Right (only reached if left was true/non-zero)
+        generateExpression(expr.getRight(), env);
+        emitInstruction("JIF", falseLabel);
+
+        // if both true
+        emitInstruction("PUSH", "1");
+        emitInstruction("JUMP", endLabel);
+
+        // False block
+        emitLabel(falseLabel);
+        emitInstruction("PUSH", "0");
+
+        emitLabel(endLabel);
+    }
 
     private void generateLogicalOr(BinaryExpression binary, Environment environment) {}
 

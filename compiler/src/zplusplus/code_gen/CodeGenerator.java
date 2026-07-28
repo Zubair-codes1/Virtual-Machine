@@ -82,7 +82,16 @@ public class CodeGenerator {
         }
     }
 
-    private void generateLiteralExpression(LiteralExpression literal) {}
+    private void generateLiteralExpression(LiteralExpression literal) {
+        if (literal.getValue() instanceof Integer) {
+            emitInstruction("PUSH", literal.getValue().toString());
+        }else if (literal.getValue() instanceof Boolean) {
+            String boolValue = (Boolean) literal.getValue() ? "1" : "0";
+            emitInstruction("PUSH", literal.getValue().toString());
+        }else if (literal.getValue() instanceof String) {
+            emitInstruction("PUSH_STR", literal.getValue().toString());
+        }
+    }
 
     private void generateVariableExpression(VariableExpression variable) {}
 

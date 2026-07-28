@@ -2,6 +2,7 @@ package zplusplus.code_gen;
 
 import zplusplus.ast.*;
 import zplusplus.exceptions.CodeGenException;
+import zplusplus.lexer.Token;
 import zplusplus.sem_analysis.Environment;
 
 import java.util.List;
@@ -72,7 +73,7 @@ public class CodeGenerator {
         }else if (expression instanceof VariableExpression variable) {
             generateVariableExpression(variable, environment);
         }else if (expression instanceof BinaryExpression binary) {
-            generateBinaryExpression(binary);
+            generateBinaryExpression(binary, environment);
         }else if (expression instanceof UnaryExpression unary) {
             generateUnaryExpression(unary);
         }else if (expression instanceof GroupingExpression grouping) {
@@ -107,7 +108,38 @@ public class CodeGenerator {
         }
     }
 
-    private void generateBinaryExpression(BinaryExpression binary) {}
+    private void generateBinaryExpression(BinaryExpression binary, Environment environment) {
+        generateExpression(binary.getLeft(), environment);
+        generateExpression(binary.getRight(), environment);
+
+        Token operator = binary.getOperator();
+        switch(operator.tokenValue()) {
+            case "+" -> emitInstruction("ADD" ,"");
+            case "-" -> emitInstruction("SUB" ,"");
+            case "*" -> emitInstruction("MULT" ,"");
+            case "/" -> emitInstruction("DIV" ,"");
+            case "%" -> emitInstruction("MOD" ,"");
+            case ">=" -> emitInstruction("GTE" ,"");
+            case "<=" -> emitInstruction("LTE" ,"");
+            case ">" -> emitInstruction("GT" ,"");
+            case "<" -> emitInstruction("LT" ,"");
+            case "==" -> emitInstruction("EQ" ,"");
+            case "!=" -> emitInstruction("NEQ" ,"");
+            case "&&" -> generateLogicalAnd(binary, environment);
+            case "||" -> generateLogicalOr(binary, environment);
+            case "&" -> emitInstruction("AND" ,"");
+            case "|" -> emitInstruction("OR" ,"");
+            case "^" -> emitInstruction("XOR" ,"");
+            default -> throw new CodeGenException(
+                    "Code Generator Error: Invalid binary operator " + operator.tokenValue(),
+                    binary.getLineNumber()
+            );
+        }
+    }
+
+    private void generateLogicalAnd(BinaryExpression binary, Environment environment) {}
+
+    private void generateLogicalOr(BinaryExpression binary, Environment environment) {}
 
     private void generateUnaryExpression(UnaryExpression unary) {}
 

@@ -41,7 +41,7 @@ public class CodeGenerator {
         for (Statement statement : statements) {
             if (statement instanceof VariableDeclarationStatement stmt && environment.isGlobal(stmt.getVarName())) {
                 if (stmt.getInitializer() != null) {
-                    generateExpression(stmt.getInitializer());
+                    generateExpression(stmt.getInitializer(), environment);
                 }else {
                     emitDefaultValue(stmt);
                 }
@@ -66,11 +66,11 @@ public class CodeGenerator {
         assemblyString.append("\t").append(instruction).append(" ").append(operand).append("\n");
     }
 
-    private void generateExpression(Expression expression) {
+    private void generateExpression(Expression expression, Environment environment) {
         if (expression instanceof LiteralExpression literal) {
             generateLiteralExpression(literal);
         }else if (expression instanceof VariableExpression variable) {
-            generateVariableExpression(variable);
+            generateVariableExpression(variable, environment);
         }else if (expression instanceof BinaryExpression binary) {
             generateBinaryExpression(binary);
         }else if (expression instanceof UnaryExpression unary) {
@@ -98,7 +98,14 @@ public class CodeGenerator {
         }
     }
 
-    private void generateVariableExpression(VariableExpression variable) {}
+    private void generateVariableExpression(VariableExpression variable, Environment environment) {
+        if (environment.isGlobal(variable.getName())) {
+            emitInstruction("LOAD",  variable.getName());
+        }else {
+            int slot = environment.getLocalSlot(variable.getName());
+            emitInstruction("LOAD_LOCAL", String.valueOf(slot));
+        }
+    }
 
     private void generateBinaryExpression(BinaryExpression binary) {}
 

@@ -90,6 +90,11 @@ public class CodeGenerator {
             emitInstruction("PUSH", literal.getValue().toString());
         }else if (literal.getValue() instanceof String) {
             emitInstruction("PUSH_STR", literal.getValue().toString());
+        }else {
+            throw new CodeGenException(
+                    "Code Generation Error: Invalid literal: " + literal.getValue(),
+                    literal.getLineNumber()
+            );
         }
     }
 

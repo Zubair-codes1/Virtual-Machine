@@ -16,6 +16,7 @@ import java.util.List;
 public class CodeGenerator {
 
     private StringBuilder assemblyString = new StringBuilder();
+    private int labelCounter = 0;
 
     /**
      * Code generator constructor
@@ -135,6 +136,14 @@ public class CodeGenerator {
                     binary.getLineNumber()
             );
         }
+    }
+
+    private String createUniqueLabel(String prefix) {
+        return ":" + prefix + "_" + (labelCounter++);
+    }
+
+    private void emitLabel(String labelName) {
+        assemblyString.append(labelName).append(":\n");
     }
 
     private void generateLogicalAnd(BinaryExpression binary, Environment environment) {}

@@ -216,7 +216,7 @@ public class CodeGenerator {
             case "~" -> emitInstruction("NOT");
             case "!" -> {
                 emitInstruction("PUSH", "0");
-                emitInstruction("NEQ", "");
+                emitInstruction("EQ");
             }
             case "-" -> {
                 // Transform -x into (0 - x)

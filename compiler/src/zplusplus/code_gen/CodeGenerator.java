@@ -169,7 +169,24 @@ public class CodeGenerator {
         emitLabel(endLabel);
     }
 
-    private void generateLogicalOr(BinaryExpression binary, Environment environment) {}
+    private void generateLogicalOr(BinaryExpression binary, Environment environment) {
+        String trueLabel = createUniqueLabel("or_false");
+        String endLabel = createUniqueLabel("or_end");
+
+        generateExpression(binary.getLeft(), environment);
+        emitInstruction("JIT", trueLabel);
+
+        generateExpression(binary.getRight(), environment);
+        emitInstruction("JIT", trueLabel);
+
+        emitInstruction("PUSH", "0");
+        emitInstruction("JUMP", endLabel);
+
+        emitLabel(trueLabel);
+        emitInstruction("PUSH", "1");
+
+        emitLabel(endLabel);
+    }
 
     private void generateUnaryExpression(UnaryExpression unary) {}
 

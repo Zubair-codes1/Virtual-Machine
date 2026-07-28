@@ -1,6 +1,7 @@
 package zplusplus.code_gen;
 
 import zplusplus.ast.Statement;
+import zplusplus.ast.VariableDeclarationStatement;
 import zplusplus.exceptions.CodeGenException;
 import zplusplus.sem_analysis.Environment;
 import zplusplus.sem_analysis.symbol.Symbol;
@@ -36,26 +37,26 @@ public class CodeGenerator {
             );
         }
 
-        emitGlobalVariables(environment);
+        emitGlobalVariables(statements, environment);
 
         return assemblyString.toString();
     }
 
-    private void emitGlobalVariables(Environment environment) {
-        HashMap<String, Symbol> symbolTable = (HashMap<String, Symbol>) environment.getTable();
-
-        for (Map.Entry<String, Symbol> entry : symbolTable.entrySet()) {
-            if (environment.isGlobal(entry.getKey()) && entry.getValue() instanceof VariableSymbol) {
-                emitDefaultValue(entry.getValue().getType().toString());
+    private void emitGlobalVariables(List<Statement> statements, Environment environment) {
+        for (Statement statement : statements) {
+            if (statement instanceof VariableDeclarationStatement stmt && environment.isGlobal(stmt.getVarName())) {
+                emitDefaultValue(stmt.getTypeName(), stmt.getVarName());
             }
         }
     }
 
-    private void emitDefaultValue(String typeName) {
+    private void emitDefaultValue(String typeName, String variableName) {
         switch (typeName.toLowerCase()) {
             case "int", "bool" -> emitInstruction("PUSH", "0");
             case "string" -> emitInstruction("PUSH_STR", "\"\"");
         }
+
+        emitInstruction("STORE", variableName);
     }
 
     private void emitInstruction(String instruction, String operand) {

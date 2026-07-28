@@ -78,7 +78,7 @@ public class CodeGenerator {
         }else if (expression instanceof UnaryExpression unary) {
             generateUnaryExpression(unary, environment);
         }else if (expression instanceof GroupingExpression grouping) {
-            generateGroupingExpression(grouping);
+            generateGroupingExpression(grouping, environment);
         }else if (expression instanceof CallingExpression calling) {
             generateCallingExpression(calling, environment);
         }

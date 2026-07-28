@@ -3,6 +3,7 @@ package zplusplus.sem_analysis;
 import java.util.HashMap;
 import java.util.Map;
 
+import zplusplus.exceptions.SemanticException;
 import zplusplus.sem_analysis.symbol.Symbol;
 
 /**
@@ -14,6 +15,8 @@ import zplusplus.sem_analysis.symbol.Symbol;
 public class Environment {
     private Environment parentEnvironment;
     private Map<String, Symbol> table = new HashMap<>();
+    private Map<String, Integer> slots = new HashMap<>();
+    private int nextFreeSlot = 0;
 
     /**
      * Constructor for Environment/Scope/Symbol table
@@ -83,6 +86,31 @@ public class Environment {
         }
 
         return false;
+    }
+
+    /**
+     * Defines a new slot and returns it;
+     * @param varName variable name
+     * @return the current slot
+     */
+    public int defineLocal(String varName) {
+        slots.put(varName, nextFreeSlot);
+        return nextFreeSlot++;
+    }
+
+    /**
+     * Gets the local slot of a variable
+     * @param varName variable name
+     * @return slot index
+     */
+    public int getLocalSlot(String varName) {
+        if (slots.containsKey(varName)) {
+            return slots.get(varName);
+        }
+        if (parentEnvironment != null) {
+            return parentEnvironment.getLocalSlot(varName);
+        }
+        return -1;
     }
 
 }

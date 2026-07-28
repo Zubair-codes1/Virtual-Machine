@@ -206,7 +206,9 @@ public class CodeGenerator {
         }
     }
 
-    private void generateGroupingExpression(GroupingExpression grouping) {}
+    private void generateGroupingExpression(GroupingExpression grouping, Environment environment) {
+        generateExpression(grouping.getExpression(), environment);
+    }
 
     private void generateCallingExpression(CallingExpression calling, Environment environment) {
 
@@ -217,6 +219,5 @@ public class CodeGenerator {
         String functionLabel = ":" + calling.getCallee();
         emitInstruction("CALL", functionLabel);
     }
-
 
 }

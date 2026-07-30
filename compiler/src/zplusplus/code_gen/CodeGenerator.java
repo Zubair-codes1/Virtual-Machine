@@ -81,6 +81,35 @@ public class CodeGenerator {
         assemblyString.append("\t").append(instruction).append("\n");
     }
 
+    private void generateStatement(Statement statement, Environment environment) {
+        if (statement instanceof VariableDeclarationStatement varDeclStmt) {
+            generateVarDeclStmt(varDeclStmt, environment);
+        }else if (statement instanceof ExpressionStatement expressionStmt) {
+            generateExprStmt(expressionStmt, environment);
+        }else if (statement instanceof AssignmentStatement assignmentStmt) {
+            generateAssignStmt(assignmentStmt, environment);
+        }else if (statement instanceof IfStatement ifStatement) {
+            generateIfStmt(ifStatement, environment);
+        }else if  (statement instanceof WhileStatement whileStatement) {
+            generateWhileStmt(whileStatement, environment);
+        }else if  (statement instanceof ForStatement forStatement) {
+            generateForStmt(forStatement, environment);
+        }
+    }
+
+    private void generateVarDeclStmt(VariableDeclarationStatement varDeclstmt, Environment environment) {}
+
+    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {}
+
+    private void generateAssignStmt(AssignmentStatement assignmentStmt, Environment environment) {}
+
+    private void generateIfStmt(IfStatement ifStmt, Environment environment) {}
+
+    private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {}
+
+    private void generateForStmt(ForStatement forStmt, Environment environment) {}
+
+
     private void generateExpression(Expression expression, Environment environment) {
         if (expression instanceof LiteralExpression literal) {
             generateLiteralExpression(literal);

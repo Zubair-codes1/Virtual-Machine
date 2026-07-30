@@ -19,19 +19,23 @@ import java.util.Stack;
  */
 public class CodeGenerator {
 
-    private StringBuilder assemblyString = new StringBuilder();
-    private int labelCounter = 0;
-    private Stack<String> breakStack = new Stack<>();
+    private StringBuilder assemblyString;
+    private int labelCounter;
+    private Stack<String> breakStack;
 
     // Local slot tracking state for fallback/mock scope contexts
-    private Map<String, Integer> fallbackLocalSlots = new HashMap<>();
-    private int nextFallbackSlot = 0;
+    private Map<String, Integer> fallbackLocalSlots;
+    private int nextFallbackSlot;
 
     /**
      * Code generator constructor
      */
     public CodeGenerator() {
-
+        this.assemblyString = new StringBuilder();
+        this.labelCounter = 0;
+        this.breakStack = new Stack<>();
+        this.fallbackLocalSlots = new HashMap<>();
+        this.nextFallbackSlot = 0;
     }
 
     public String generate(List<Statement> statements, Environment environment) {
@@ -43,7 +47,8 @@ public class CodeGenerator {
             );
         }
 
-        resetLocalScope();
+        // Clean slate for every single generation run (crucial for CI test suites)
+        resetGeneratorState();
 
         emitGlobalVariables(statements, environment);
 
@@ -60,9 +65,22 @@ public class CodeGenerator {
         return assemblyString.toString();
     }
 
+    /**
+     * Fully resets generator state before running a generation pass.
+     */
+    private void resetGeneratorState() {
+        this.assemblyString = new StringBuilder();
+        this.labelCounter = 0;
+        this.breakStack.clear();
+        resetLocalScope();
+    }
+
+    /**
+     * Resets local variable slot tracking for new function scopes.
+     */
     private void resetLocalScope() {
-        fallbackLocalSlots.clear();
-        nextFallbackSlot = 0;
+        this.fallbackLocalSlots.clear();
+        this.nextFallbackSlot = 0;
     }
 
     private boolean envHasSlot(Environment env, String varName) {
@@ -317,7 +335,6 @@ public class CodeGenerator {
 
         List<Parameter> params = funcDeclStmt.getParameters();
 
-        // Register parameter positions so fallback slot allocation assigns 0, 1, 2...
         for (int i = 0; i < params.size(); i++) {
             String paramName = params.get(i).name();
             if (!envHasSlot(environment, paramName)) {
@@ -326,7 +343,6 @@ public class CodeGenerator {
         }
         nextFallbackSlot = Math.max(nextFallbackSlot, params.size());
 
-        // Emit STORE_LOCAL in reverse order (top of stack holds last argument)
         for (int i = params.size() - 1; i >= 0; i--) {
             int slot = getLocalSlot(params.get(i).name(), environment);
             emitInstruction(

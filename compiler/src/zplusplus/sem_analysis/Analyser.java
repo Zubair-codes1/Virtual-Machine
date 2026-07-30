@@ -39,10 +39,12 @@ public class Analyser {
     /**
      * Loops through each statement and calls analyseStatement()
      */
-    public void analyse() {
+    public Environment analyse() {
         for (Statement statement : statements) {
             analyseStatement(statement);
         }
+
+        return currentEnvironment;
     }
 
     /**

@@ -39,9 +39,12 @@ public class CodeGenerator {
 
         emitGlobalVariables(statements, environment);
 
+        emitInstruction("CALL", ":main");
+        emitInstruction("HALT");
+
         for (Statement statement : statements) {
-            if (!(statement instanceof VariableDeclarationStatement varDeclStmt && environment.isGlobal(varDeclStmt.getVarName()))) {
-                generateStatement(statement, environment);
+            if (statement instanceof FunctionDeclarationStatement fdStmt && environment.isGlobal(fdStmt.getName())) {
+                generateFuncDeclStmt(fdStmt, environment);
             }
         }
 
@@ -161,6 +164,7 @@ public class CodeGenerator {
         }
 
         generateStatement(ifStmt.getIfStatement(), environment);
+        emitInstruction("JUMP", endLabel);
 
         if (ifStmt.getElseStatement() != null) {
             emitLabel(elseLabel);

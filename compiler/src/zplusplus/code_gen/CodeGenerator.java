@@ -84,16 +84,24 @@ public class CodeGenerator {
     private void generateStatement(Statement statement, Environment environment) {
         if (statement instanceof VariableDeclarationStatement varDeclStmt) {
             generateVarDeclStmt(varDeclStmt, environment);
-        }else if (statement instanceof ExpressionStatement expressionStmt) {
+        } else if (statement instanceof ExpressionStatement expressionStmt) {
             generateExprStmt(expressionStmt, environment);
-        }else if (statement instanceof AssignmentStatement assignmentStmt) {
+        } else if (statement instanceof AssignmentStatement assignmentStmt) {
             generateAssignStmt(assignmentStmt, environment);
-        }else if (statement instanceof IfStatement ifStatement) {
+        } else if (statement instanceof IfStatement ifStatement) {
             generateIfStmt(ifStatement, environment);
-        }else if  (statement instanceof WhileStatement whileStatement) {
+        } else if  (statement instanceof WhileStatement whileStatement) {
             generateWhileStmt(whileStatement, environment);
-        }else if  (statement instanceof ForStatement forStatement) {
+        } else if  (statement instanceof ForStatement forStatement) {
             generateForStmt(forStatement, environment);
+        } else if (statement instanceof BlockStatement blockStmt) {
+            generateBlockStmt(blockStmt, environment);
+        } else if (statement instanceof BreakStatement breakStmt) {
+            generateBreakStmt(breakStmt, environment);
+        } else if  (statement instanceof ReturnStatement returnStmt) {
+            generateReturnStmt(returnStmt, environment);
+        } else if (statement instanceof FunctionDeclarationStatement functionStmt) {
+            generateFuncDeclStmt(functionStmt, environment);
         }
     }
 
@@ -108,6 +116,14 @@ public class CodeGenerator {
     private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {}
 
     private void generateForStmt(ForStatement forStmt, Environment environment) {}
+
+    private void generateBlockStmt(BlockStatement blockStmt, Environment environment) {}
+
+    private void generateBreakStmt(BreakStatement breakStmt, Environment environment) {}
+
+    private void generateReturnStmt(ReturnStatement returnStmt, Environment environment) {}
+
+    private void generateFuncDeclStmt(FunctionDeclarationStatement funcDeclStmt, Environment environment) {}
 
 
     private void generateExpression(Expression expression, Environment environment) {

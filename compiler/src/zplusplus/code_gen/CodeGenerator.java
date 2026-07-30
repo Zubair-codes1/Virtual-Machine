@@ -147,7 +147,20 @@ public class CodeGenerator {
         }
     }
 
-    private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {}
+    private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {
+        String startLabel = createUniqueLabel("startLabel");
+        String endLabel = createUniqueLabel("endLabel");
+
+        emitLabel(startLabel);
+
+        generateExpression(whileStmt.getCondition(), environment);
+        emitInstruction("JIF", endLabel);
+
+        generateStatement(whileStmt.getBody(), environment);
+        emitInstruction("JUMP", startLabel);
+
+        emitLabel(endLabel);
+    }
 
     private void generateForStmt(ForStatement forStmt, Environment environment) {}
 

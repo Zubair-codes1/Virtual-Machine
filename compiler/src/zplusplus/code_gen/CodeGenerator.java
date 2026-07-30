@@ -105,7 +105,17 @@ public class CodeGenerator {
         }
     }
 
-    private void generateVarDeclStmt(VariableDeclarationStatement varDeclstmt, Environment environment) {}
+    private void generateVarDeclStmt(VariableDeclarationStatement varDeclstmt, Environment environment) {
+        Expression initializer = varDeclstmt.getInitializer();
+        if (initializer != null) {
+            generateExpression(initializer, environment);
+        }else {
+            emitDefaultValue(varDeclstmt);
+        }
+
+        int localSlot = environment.getLocalSlot(varDeclstmt.getVarName());
+        emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
+    }
 
     private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {}
 

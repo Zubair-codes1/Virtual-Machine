@@ -182,7 +182,9 @@ public class CodeGenerator {
     }
 
     private void generateBlockStmt(BlockStatement blockStmt, Environment environment) {
-
+        for (Statement statement : blockStmt.getStatements()) {
+            generateStatement(statement, environment);
+        }
     }
 
     private void generateBreakStmt(BreakStatement breakStmt, Environment environment) {}

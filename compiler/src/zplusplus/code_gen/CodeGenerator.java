@@ -137,12 +137,17 @@ public class CodeGenerator {
         String endLabel = createUniqueLabel("endLabel");
 
         generateExpression(ifStmt.getCondition(), environment);
-
         if (ifStmt.getElseStatement() != null) {
             emitInstruction("JIF", elseLabel);
-            generateStatement(ifStmt.getIfStatement(), environment);
+        }else {
+            emitInstruction("JIF", endLabel);
+        }
 
-            emitLabel(elseLabel);
+        generateStatement(ifStmt.getIfStatement(), environment);
+        emitInstruction("JUMP", endLabel);
+
+        emitLabel(elseLabel);
+        if (ifStmt.getElseStatement() != null) {
             generateStatement(ifStmt.getElseStatement(), environment);
         }
 
@@ -174,7 +179,7 @@ public class CodeGenerator {
         String startLabel = createUniqueLabel("startLabel");
         String endLabel = createUniqueLabel("endLabel");
 
-        breakStack.push(startLabel);
+        breakStack.push(endLabel);
 
         emitLabel(startLabel);
 
@@ -210,10 +215,13 @@ public class CodeGenerator {
     }
 
     private void generateFuncDeclStmt(FunctionDeclarationStatement funcDeclStmt, Environment environment) {
-        emitLabel(funcDeclStmt.getName());
+        emitLabel(":" + funcDeclStmt.getName());
 
         for (int i = funcDeclStmt.getParameters().size() - 1; i >= 0; i--) {
-            emitInstruction("STORE_LOCAL", String.valueOf(i));
+            emitInstruction(
+                    "STORE_LOCAL",
+                    String.valueOf(environment.getLocalSlot(funcDeclStmt.getParameters().get(i).name()))
+            );
         }
 
         generateStatement(funcDeclStmt.getBody(), environment);

@@ -14,15 +14,13 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        if (
-                args.length != 2 || !args[0].endsWith(".zpp") || !args[1].endsWith(".asm")
-        ) {
+        if (args.length != 2 || !args[0].endsWith(".zpp") || !args[1].endsWith(".asm")) {
             System.err.println("Error Usage: zcc <zpp file path> <asm file path>");
             return;
         }
 
         try {
-            String code = Files.readString(Paths.get(args[1]));
+            String code = Files.readString(Paths.get(args[0]));
 
             Parser parser = new Parser();
             List<Statement> statements = parser.parse(code);
@@ -33,11 +31,10 @@ public class Main {
             CodeGenerator codeGenerator = new CodeGenerator();
             String assembly = codeGenerator.generate(statements, environment);
 
-            Files.write(Paths.get(args[2]), assembly.getBytes());
-
+            Files.write(Paths.get(args[1]), assembly.getBytes());
 
         } catch (IOException e) {
-            throw new CompilerException("Compiler Error: Could not read file", 0);
+            System.err.println("Compiler Error: Could not read or write file - " + e.getMessage());
         } catch (CompilerException e) {
             System.err.println(e.getMessage());
         }

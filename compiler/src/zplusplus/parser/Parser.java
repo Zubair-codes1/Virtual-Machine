@@ -212,8 +212,15 @@ public class Parser {
     private Expression primary() {
         Token token = peekToken();
 
-        // handle int and string literals
-        if (token.type() == TokenType.INT || token.type() == TokenType.STRING) {
+        // handle int literals
+        if (token.type() == TokenType.INT) {
+            advance();
+            int value = Integer.parseInt(token.tokenValue());
+            return new LiteralExpression(value, token.lineNumber());
+        }
+
+        // handle string literals
+        if (token.type() == TokenType.STRING) {
             advance();
             return new LiteralExpression(token.tokenValue(), token.lineNumber());
         }

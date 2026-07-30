@@ -162,7 +162,24 @@ public class CodeGenerator {
         emitLabel(endLabel);
     }
 
-    private void generateForStmt(ForStatement forStmt, Environment environment) {}
+    private void generateForStmt(ForStatement forStmt, Environment environment) {
+
+        generateStatement(forStmt.getInitializer(), environment);
+
+        String startLabel = createUniqueLabel("startLabel");
+        String endLabel = createUniqueLabel("endLabel");
+
+        emitLabel(startLabel);
+
+        generateExpression(forStmt.getCondition(), environment);
+        emitInstruction("JIF", endLabel);
+
+        generateStatement(forStmt.getBody(), environment);
+        generateStatement(forStmt.getIncrement(), environment);
+
+        emitInstruction("JUMP", startLabel);
+        emitLabel(endLabel);
+    }
 
     private void generateBlockStmt(BlockStatement blockStmt, Environment environment) {}
 

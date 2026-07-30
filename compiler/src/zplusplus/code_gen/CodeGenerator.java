@@ -251,15 +251,38 @@ public class CodeGenerator {
         emitInstruction("RET");
     }
 
+    private Type getExpressionType(Expression expr, Environment env) {
+        if (expr instanceof LiteralExpression literal) {
+            if (literal.getValue() instanceof String) {
+                return Type.STRING;
+            }
+            return Type.INT;
+        }
+
+        if (expr instanceof VariableExpression varExpr) {
+            return env.getSymbol(varExpr.getName()).getType();
+        }
+
+        if (expr instanceof CallingExpression callExpr) {
+            return env.getSymbol(callExpr.getCallee()).getType();
+        }
+
+        if (expr instanceof GroupingExpression groupExpr) {
+            return getExpressionType(groupExpr.getExpression(), env);
+        }
+
+        return Type.INT;
+    }
+
     public void generatePrintStmt(PrintStatement stmt, Environment environment) {
         generateExpression(stmt.getExpression(), environment);
 
-        if (stmt.getExpression() instanceof LiteralExpression ltrExpr) {
-            if (ltrExpr.getValue() instanceof Integer || ltrExpr.getValue() instanceof Boolean) {
-                emitInstruction("PRINT");
-            }else if (ltrExpr.getValue() instanceof String) {
-                emitInstruction("PRINT_STR");
-            }
+        Type exprType = getExpressionType(stmt.getExpression(), environment);
+
+        if (exprType == Type.STRING) {
+            emitInstruction("PRINT_STR");
+        } else {
+            emitInstruction("PRINT");
         }
     }
 

@@ -209,7 +209,17 @@ public class CodeGenerator {
         emitInstruction("RET");
     }
 
-    private void generateFuncDeclStmt(FunctionDeclarationStatement funcDeclStmt, Environment environment) {}
+    private void generateFuncDeclStmt(FunctionDeclarationStatement funcDeclStmt, Environment environment) {
+        emitLabel(funcDeclStmt.getName());
+
+        for (int i = funcDeclStmt.getParameters().size() - 1; i >= 0; i--) {
+            emitInstruction("STORE_LOCAL", String.valueOf(i));
+        }
+
+        generateStatement(funcDeclStmt.getBody(), environment);
+
+        emitInstruction("RET");
+    }
 
 
     private void generateExpression(Expression expression, Environment environment) {

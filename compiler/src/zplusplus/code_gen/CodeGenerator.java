@@ -40,7 +40,7 @@ public class CodeGenerator {
         emitGlobalVariables(statements, environment);
 
         for (Statement statement : statements) {
-            if (!(statement instanceof ExpressionStatement)) {
+            if (!(statement instanceof VariableDeclarationStatement varDeclStmt && environment.isGlobal(varDeclStmt.getVarName()))) {
                 generateStatement(statement, environment);
             }
         }
@@ -130,9 +130,11 @@ public class CodeGenerator {
         generateExpression(exprStmt.getExpression(), environment);
 
         if (exprStmt.getExpression() instanceof CallingExpression callingExpression){
-            if (environment.getSymbol(callingExpression.getCallee()).getType() == Type.VOID) {
+            if (environment.getSymbol(callingExpression.getCallee()).getType() != Type.VOID) {
                 emitInstruction("POP");
             }
+        }else {
+            emitInstruction("POP");
         }
     }
 
@@ -159,7 +161,6 @@ public class CodeGenerator {
         }
 
         generateStatement(ifStmt.getIfStatement(), environment);
-        emitInstruction("JUMP", endLabel);
 
         if (ifStmt.getElseStatement() != null) {
             emitLabel(elseLabel);

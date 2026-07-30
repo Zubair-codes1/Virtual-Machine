@@ -117,9 +117,7 @@ public class CodeGenerator {
         emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
     }
 
-    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {
-
-    }
+    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {}
 
     private void generateAssignStmt(AssignmentStatement assignmentStmt, Environment environment) {
         generateExpression(assignmentStmt.getExpression(), environment);
@@ -132,7 +130,22 @@ public class CodeGenerator {
         }
     }
 
-    private void generateIfStmt(IfStatement ifStmt, Environment environment) {}
+    private void generateIfStmt(IfStatement ifStmt, Environment environment) {
+        String elseLabel = createUniqueLabel("elseLabel");
+        String endLabel = createUniqueLabel("endLabel");
+
+        generateExpression(ifStmt.getCondition(), environment);
+        emitInstruction("JIF", elseLabel);
+
+        generateStatement(ifStmt.getIfStatement(), environment);
+
+        if (ifStmt.getElseStatement() != null) {
+            emitLabel(elseLabel);
+            generateStatement(ifStmt.getElseStatement(), environment);
+        }else {
+            emitLabel(endLabel);
+        }
+    }
 
     private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {}
 

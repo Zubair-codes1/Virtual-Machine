@@ -117,9 +117,20 @@ public class CodeGenerator {
         emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
     }
 
-    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {}
+    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {
 
-    private void generateAssignStmt(AssignmentStatement assignmentStmt, Environment environment) {}
+    }
+
+    private void generateAssignStmt(AssignmentStatement assignmentStmt, Environment environment) {
+        generateExpression(assignmentStmt.getExpression(), environment);
+
+        if (environment.isGlobal(assignmentStmt.getName())) {
+            emitInstruction("STORE", assignmentStmt.getName());
+        }else {
+            int localSlot = environment.getLocalSlot(assignmentStmt.getName());
+            emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
+        }
+    }
 
     private void generateIfStmt(IfStatement ifStmt, Environment environment) {}
 

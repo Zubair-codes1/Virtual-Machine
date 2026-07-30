@@ -6,6 +6,7 @@ import zplusplus.lexer.Token;
 import zplusplus.sem_analysis.Environment;
 
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Class to handle code generation into my custom VM
@@ -17,6 +18,7 @@ public class CodeGenerator {
 
     private StringBuilder assemblyString = new StringBuilder();
     private int labelCounter = 0;
+    private Stack<String> breakStack = new Stack<>();
 
     /**
      * Code generator constructor
@@ -151,6 +153,8 @@ public class CodeGenerator {
         String startLabel = createUniqueLabel("startLabel");
         String endLabel = createUniqueLabel("endLabel");
 
+        breakStack.push(endLabel);
+
         emitLabel(startLabel);
 
         generateExpression(whileStmt.getCondition(), environment);
@@ -160,6 +164,7 @@ public class CodeGenerator {
         emitInstruction("JUMP", startLabel);
 
         emitLabel(endLabel);
+        breakStack.pop();
     }
 
     private void generateForStmt(ForStatement forStmt, Environment environment) {
@@ -168,6 +173,8 @@ public class CodeGenerator {
 
         String startLabel = createUniqueLabel("startLabel");
         String endLabel = createUniqueLabel("endLabel");
+
+        breakStack.push(startLabel);
 
         emitLabel(startLabel);
 
@@ -179,6 +186,8 @@ public class CodeGenerator {
 
         emitInstruction("JUMP", startLabel);
         emitLabel(endLabel);
+
+        breakStack.pop();
     }
 
     private void generateBlockStmt(BlockStatement blockStmt, Environment environment) {
@@ -187,7 +196,10 @@ public class CodeGenerator {
         }
     }
 
-    private void generateBreakStmt(BreakStatement breakStmt, Environment environment) {}
+    private void generateBreakStmt(BreakStatement breakStmt, Environment environment) {
+        String currentEndLabel = breakStack.peek();
+        emitInstruction("JUMP", currentEndLabel);
+    }
 
     private void generateReturnStmt(ReturnStatement returnStmt, Environment environment) {}
 

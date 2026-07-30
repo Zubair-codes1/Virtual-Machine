@@ -114,6 +114,8 @@ public class CodeGenerator {
             generateReturnStmt(returnStmt, environment);
         } else if (statement instanceof FunctionDeclarationStatement functionStmt) {
             generateFuncDeclStmt(functionStmt, environment);
+        } else if (statement instanceof PrintStatement printStmt) {
+            generatePrintStmt(printStmt, environment);
         }
     }
 
@@ -249,6 +251,17 @@ public class CodeGenerator {
         emitInstruction("RET");
     }
 
+    public void generatePrintStmt(PrintStatement stmt, Environment environment) {
+        generateExpression(stmt.getExpression(), environment);
+
+        if (stmt.getExpression() instanceof LiteralExpression ltrExpr) {
+            if (ltrExpr.getValue() instanceof Integer || ltrExpr.getValue() instanceof Boolean) {
+                emitInstruction("PRINT");
+            }else if (ltrExpr.getValue() instanceof String) {
+                emitInstruction("PRINT_STR");
+            }
+        }
+    }
 
     private void generateExpression(Expression expression, Environment environment) {
         if (expression instanceof LiteralExpression literal) {

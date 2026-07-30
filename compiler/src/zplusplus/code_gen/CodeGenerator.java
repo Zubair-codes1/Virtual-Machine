@@ -4,6 +4,7 @@ import zplusplus.ast.*;
 import zplusplus.exceptions.CodeGenException;
 import zplusplus.lexer.Token;
 import zplusplus.sem_analysis.Environment;
+import zplusplus.sem_analysis.Type;
 
 import java.util.List;
 import java.util.Stack;
@@ -125,7 +126,15 @@ public class CodeGenerator {
         emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
     }
 
-    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {}
+    private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {
+        generateExpression(exprStmt.getExpression(), environment);
+
+        if (exprStmt.getExpression() instanceof CallingExpression callingExpression){
+            if (environment.getSymbol(callingExpression.getCallee()).getType() == Type.VOID) {
+                emitInstruction("POP");
+            }
+        }
+    }
 
     private void generateAssignStmt(AssignmentStatement assignmentStmt, Environment environment) {
         generateExpression(assignmentStmt.getExpression(), environment);

@@ -100,7 +100,7 @@ public class ParserTest {
         String invalidInput = "int x = 42"; // Missing ';'
 
         SyntaxException exception = assertThrows(SyntaxException.class, () -> {
-            parser.parse(invalidInput);
+            List<Statement> statements = parser.parse(invalidInput);
         });
 
         assertTrue(exception.getMessage().contains("Expected ';'"));
@@ -111,7 +111,7 @@ public class ParserTest {
         String invalidInput = "if (x == 5 { print(x); }"; // Missing ')'
 
         SyntaxException exception = assertThrows(SyntaxException.class, () -> {
-            parser.parse(invalidInput);
+            List<Statement> statements = parser.parse(invalidInput);
         });
 
         assertTrue(exception.getMessage().contains("Expected ')'"));
@@ -285,7 +285,7 @@ public class ParserTest {
         String input = "compute(1, 2, );"; // Structural invalid trailing comma
 
         SyntaxException exception = assertThrows(SyntaxException.class, () -> {
-            parser.parse(input);
+            List<Statement> statements = parser.parse(input);
         });
         assertTrue(exception.getMessage().contains("Trailing comma in argument list"));
     }
@@ -295,7 +295,7 @@ public class ParserTest {
         String input = "def int compute(int a, ) { return a; }";
 
         SyntaxException exception = assertThrows(SyntaxException.class, () -> {
-            parser.parse(input);
+            List<Statement> statements = parser.parse(input);
         });
         assertTrue(exception.getMessage().contains("Trailing comma in parameter list"));
     }

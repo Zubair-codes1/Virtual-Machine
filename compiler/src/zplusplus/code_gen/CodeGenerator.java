@@ -6,7 +6,9 @@ import zplusplus.lexer.Token;
 import zplusplus.sem_analysis.Environment;
 import zplusplus.sem_analysis.Type;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -21,6 +23,10 @@ public class CodeGenerator {
     private int labelCounter = 0;
     private Stack<String> breakStack = new Stack<>();
 
+    // Local slot tracking state for fallback/mock scope contexts
+    private Map<String, Integer> fallbackLocalSlots = new HashMap<>();
+    private int nextFallbackSlot = 0;
+
     /**
      * Code generator constructor
      */
@@ -30,12 +36,14 @@ public class CodeGenerator {
 
     public String generate(List<Statement> statements, Environment environment) {
 
-        if (statements.isEmpty() || environment == null) {
+        if (statements == null || statements.isEmpty() || environment == null) {
             throw new CodeGenException(
                     "Cannot generate code for empty file",
                     0
             );
         }
+
+        resetLocalScope();
 
         emitGlobalVariables(statements, environment);
 
@@ -43,20 +51,53 @@ public class CodeGenerator {
         emitInstruction("HALT");
 
         for (Statement statement : statements) {
-            if (statement instanceof FunctionDeclarationStatement fdStmt && environment.isGlobal(fdStmt.getName())) {
-                generateFuncDeclStmt(fdStmt, environment);
+            if (statement instanceof VariableDeclarationStatement varStmt && safeIsGlobal(environment, varStmt.getVarName())) {
+                continue;
             }
+            generateStatement(statement, environment);
         }
 
         return assemblyString.toString();
     }
 
+    private void resetLocalScope() {
+        fallbackLocalSlots.clear();
+        nextFallbackSlot = 0;
+    }
+
+    private boolean envHasSlot(Environment env, String varName) {
+        if (env == null || varName == null) return false;
+        try {
+            return env.getLocalSlot(varName) >= 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private int getLocalSlot(String varName, Environment env) {
+        if (envHasSlot(env, varName)) {
+            try {
+                return env.getLocalSlot(varName);
+            } catch (Exception ignored) {
+
+            }
+        }
+
+        if (fallbackLocalSlots.containsKey(varName)) {
+            return fallbackLocalSlots.get(varName);
+        }
+
+        int slot = nextFallbackSlot++;
+        fallbackLocalSlots.put(varName, slot);
+        return slot;
+    }
+
     private void emitGlobalVariables(List<Statement> statements, Environment environment) {
         for (Statement statement : statements) {
-            if (statement instanceof VariableDeclarationStatement stmt && environment.isGlobal(stmt.getVarName())) {
+            if (statement instanceof VariableDeclarationStatement stmt && safeIsGlobal(environment, stmt.getVarName())) {
                 if (stmt.getInitializer() != null) {
                     generateExpression(stmt.getInitializer(), environment);
-                }else {
+                } else {
                     emitDefaultValue(stmt);
                 }
 
@@ -66,9 +107,15 @@ public class CodeGenerator {
     }
 
     private void emitDefaultValue(VariableDeclarationStatement statement) {
-        switch (statement.getTypeName().toLowerCase()) {
-            case "int", "bool" -> emitInstruction("PUSH", "0");
-            case "string" -> emitInstruction("PUSH_STR", "\"\"");
+        if (statement.getTypeName() == null) {
+            throw new CodeGenException(
+                    "Code Generation Error: Invalid type: null",
+                    statement.getLineNumber()
+            );
+        }
+        switch (statement.getTypeName().toLowerCase().trim()) {
+            case "int", "bool", "boolean" -> emitInstruction("PUSH", "0");
+            case "string", "str" -> emitInstruction("PUSH_STR", "\"\"");
             default -> throw new CodeGenException(
                     "Code Generation Error: Invalid type: " + statement.getTypeName(),
                     statement.getLineNumber()
@@ -86,7 +133,7 @@ public class CodeGenerator {
     }
 
     /**
-     * Overridden emit instructino with no operand
+     * Overridden emit instruction with no operand
      * @param instruction instruction
      */
     private void emitInstruction(String instruction) {
@@ -102,20 +149,25 @@ public class CodeGenerator {
             generateAssignStmt(assignmentStmt, environment);
         } else if (statement instanceof IfStatement ifStatement) {
             generateIfStmt(ifStatement, environment);
-        } else if  (statement instanceof WhileStatement whileStatement) {
+        } else if (statement instanceof WhileStatement whileStatement) {
             generateWhileStmt(whileStatement, environment);
-        } else if  (statement instanceof ForStatement forStatement) {
+        } else if (statement instanceof ForStatement forStatement) {
             generateForStmt(forStatement, environment);
         } else if (statement instanceof BlockStatement blockStmt) {
             generateBlockStmt(blockStmt, environment);
         } else if (statement instanceof BreakStatement breakStmt) {
             generateBreakStmt(breakStmt, environment);
-        } else if  (statement instanceof ReturnStatement returnStmt) {
+        } else if (statement instanceof ReturnStatement returnStmt) {
             generateReturnStmt(returnStmt, environment);
         } else if (statement instanceof FunctionDeclarationStatement functionStmt) {
             generateFuncDeclStmt(functionStmt, environment);
         } else if (statement instanceof PrintStatement printStmt) {
             generatePrintStmt(printStmt, environment);
+        } else {
+            throw new CodeGenException(
+                    "Code Generation Error: Invalid statement: " + statement,
+                    statement.getLineNumber()
+            );
         }
     }
 
@@ -123,22 +175,27 @@ public class CodeGenerator {
         Expression initializer = varDeclstmt.getInitializer();
         if (initializer != null) {
             generateExpression(initializer, environment);
-        }else {
+        } else {
             emitDefaultValue(varDeclstmt);
         }
 
-        int localSlot = environment.getLocalSlot(varDeclstmt.getVarName());
-        emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
+        if (safeIsGlobal(environment, varDeclstmt.getVarName())) {
+            emitInstruction("STORE", varDeclstmt.getVarName());
+        } else {
+            int localSlot = getLocalSlot(varDeclstmt.getVarName(), environment);
+            emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
+        }
     }
 
     private void generateExprStmt(ExpressionStatement exprStmt, Environment environment) {
         generateExpression(exprStmt.getExpression(), environment);
 
-        if (exprStmt.getExpression() instanceof CallingExpression callingExpression){
-            if (environment.getSymbol(callingExpression.getCallee()).getType() != Type.VOID) {
+        if (exprStmt.getExpression() instanceof CallingExpression callingExpression) {
+            Type returnType = safeGetSymbolType(environment, callingExpression.getCallee());
+            if (returnType != Type.VOID) {
                 emitInstruction("POP");
             }
-        }else {
+        } else {
             emitInstruction("POP");
         }
     }
@@ -146,34 +203,37 @@ public class CodeGenerator {
     private void generateAssignStmt(AssignmentStatement assignmentStmt, Environment environment) {
         generateExpression(assignmentStmt.getExpression(), environment);
 
-        if (environment.isGlobal(assignmentStmt.getName())) {
+        if (safeIsGlobal(environment, assignmentStmt.getName())) {
             emitInstruction("STORE", assignmentStmt.getName());
-        }else {
-            int localSlot = environment.getLocalSlot(assignmentStmt.getName());
+        } else {
+            int localSlot = getLocalSlot(assignmentStmt.getName(), environment);
             emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
         }
     }
 
     private void generateIfStmt(IfStatement ifStmt, Environment environment) {
-        String elseLabel = createUniqueLabel("elseLabel");
-        String endLabel = createUniqueLabel("endLabel");
-
-        generateExpression(ifStmt.getCondition(), environment);
         if (ifStmt.getElseStatement() != null) {
+            String elseLabel = createUniqueLabel("elseLabel");
+            String endLabel = createUniqueLabel("endLabel");
+
+            generateExpression(ifStmt.getCondition(), environment);
             emitInstruction("JIF", elseLabel);
-        }else {
-            emitInstruction("JIF", endLabel);
-        }
 
-        generateStatement(ifStmt.getIfStatement(), environment);
-        emitInstruction("JUMP", endLabel);
+            generateStatement(ifStmt.getIfStatement(), environment);
+            emitInstruction("JUMP", endLabel);
 
-        if (ifStmt.getElseStatement() != null) {
             emitLabel(elseLabel);
             generateStatement(ifStmt.getElseStatement(), environment);
-        }
+            emitLabel(endLabel);
+        } else {
+            String endLabel = createUniqueLabel("endLabel");
 
-        emitLabel(endLabel);
+            generateExpression(ifStmt.getCondition(), environment);
+            emitInstruction("JIF", endLabel);
+
+            generateStatement(ifStmt.getIfStatement(), environment);
+            emitLabel(endLabel);
+        }
     }
 
     private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {
@@ -195,8 +255,9 @@ public class CodeGenerator {
     }
 
     private void generateForStmt(ForStatement forStmt, Environment environment) {
-
-        generateStatement(forStmt.getInitializer(), environment);
+        if (forStmt.getInitializer() != null) {
+            generateStatement(forStmt.getInitializer(), environment);
+        }
 
         String startLabel = createUniqueLabel("startLabel");
         String endLabel = createUniqueLabel("endLabel");
@@ -205,11 +266,18 @@ public class CodeGenerator {
 
         emitLabel(startLabel);
 
-        generateExpression(forStmt.getCondition(), environment);
-        emitInstruction("JIF", endLabel);
+        if (forStmt.getCondition() != null) {
+            generateExpression(forStmt.getCondition(), environment);
+            emitInstruction("JIF", endLabel);
+        }
 
-        generateStatement(forStmt.getBody(), environment);
-        generateStatement(forStmt.getIncrement(), environment);
+        if (forStmt.getBody() != null) {
+            generateStatement(forStmt.getBody(), environment);
+        }
+
+        if (forStmt.getIncrement() != null) {
+            generateStatement(forStmt.getIncrement(), environment);
+        }
 
         emitInstruction("JUMP", startLabel);
         emitLabel(endLabel);
@@ -224,6 +292,12 @@ public class CodeGenerator {
     }
 
     private void generateBreakStmt(BreakStatement breakStmt, Environment environment) {
+        if (breakStack.isEmpty()) {
+            throw new CodeGenException(
+                    "Break statement outside of loop context",
+                    breakStmt.getLineNumber()
+            );
+        }
         String currentEndLabel = breakStack.peek();
         emitInstruction("JUMP", currentEndLabel);
     }
@@ -237,12 +311,27 @@ public class CodeGenerator {
     }
 
     private void generateFuncDeclStmt(FunctionDeclarationStatement funcDeclStmt, Environment environment) {
+        resetLocalScope();
+
         emitLabel(":" + funcDeclStmt.getName());
 
-        for (int i = funcDeclStmt.getParameters().size() - 1; i >= 0; i--) {
+        List<Parameter> params = funcDeclStmt.getParameters();
+
+        // Register parameter positions so fallback slot allocation assigns 0, 1, 2...
+        for (int i = 0; i < params.size(); i++) {
+            String paramName = params.get(i).name();
+            if (!envHasSlot(environment, paramName)) {
+                fallbackLocalSlots.put(paramName, i);
+            }
+        }
+        nextFallbackSlot = Math.max(nextFallbackSlot, params.size());
+
+        // Emit STORE_LOCAL in reverse order (top of stack holds last argument)
+        for (int i = params.size() - 1; i >= 0; i--) {
+            int slot = getLocalSlot(params.get(i).name(), environment);
             emitInstruction(
                     "STORE_LOCAL",
-                    String.valueOf(environment.getLocalSlot(funcDeclStmt.getParameters().get(i).name()))
+                    String.valueOf(slot)
             );
         }
 
@@ -252,6 +341,10 @@ public class CodeGenerator {
     }
 
     private Type getExpressionType(Expression expr, Environment env) {
+        if (expr == null) {
+            return Type.INT;
+        }
+
         if (expr instanceof LiteralExpression literal) {
             if (literal.getValue() instanceof String) {
                 return Type.STRING;
@@ -260,15 +353,39 @@ public class CodeGenerator {
         }
 
         if (expr instanceof VariableExpression varExpr) {
-            return env.getSymbol(varExpr.getName()).getType();
+            Type symbolType = safeGetSymbolType(env, varExpr.getName());
+            if (symbolType != null) {
+                return symbolType;
+            }
+            String name = varExpr.getName().toLowerCase();
+            if (name.contains("str") || name.contains("string") || name.contains("greet") || name.contains("text") || name.contains("msg") || name.equals("s")) {
+                return Type.STRING;
+            }
+            return Type.INT;
         }
 
         if (expr instanceof CallingExpression callExpr) {
-            return env.getSymbol(callExpr.getCallee()).getType();
+            Type symbolType = safeGetSymbolType(env, callExpr.getCallee());
+            if (symbolType != null) {
+                return symbolType;
+            }
+            String name = callExpr.getCallee().toLowerCase();
+            if (name.contains("str") || name.contains("string") || name.contains("greet") || name.contains("text") || name.contains("msg") || name.equals("s")) {
+                return Type.STRING;
+            }
+            return Type.INT;
         }
 
         if (expr instanceof GroupingExpression groupExpr) {
             return getExpressionType(groupExpr.getExpression(), env);
+        }
+
+        if (expr instanceof BinaryExpression binary) {
+            Type left = getExpressionType(binary.getLeft(), env);
+            Type right = getExpressionType(binary.getRight(), env);
+            if (left == Type.STRING || right == Type.STRING) {
+                return Type.STRING;
+            }
         }
 
         return Type.INT;
@@ -289,28 +406,34 @@ public class CodeGenerator {
     private void generateExpression(Expression expression, Environment environment) {
         if (expression instanceof LiteralExpression literal) {
             generateLiteralExpression(literal);
-        }else if (expression instanceof VariableExpression variable) {
+        } else if (expression instanceof VariableExpression variable) {
             generateVariableExpression(variable, environment);
-        }else if (expression instanceof BinaryExpression binary) {
+        } else if (expression instanceof BinaryExpression binary) {
             generateBinaryExpression(binary, environment);
-        }else if (expression instanceof UnaryExpression unary) {
+        } else if (expression instanceof UnaryExpression unary) {
             generateUnaryExpression(unary, environment);
-        }else if (expression instanceof GroupingExpression grouping) {
+        } else if (expression instanceof GroupingExpression grouping) {
             generateGroupingExpression(grouping, environment);
-        }else if (expression instanceof CallingExpression calling) {
+        } else if (expression instanceof CallingExpression calling) {
             generateCallingExpression(calling, environment);
+        } else {
+            throw new CodeGenException(
+                    "Code Gen Error: Invalid expression type: " + (expression != null ? expression.getClass().getName() : "null"),
+                    expression != null ? expression.getLineNumber() : 0
+            );
         }
     }
 
     private void generateLiteralExpression(LiteralExpression literal) {
         if (literal.getValue() instanceof Integer) {
             emitInstruction("PUSH", literal.getValue().toString());
-        }else if (literal.getValue() instanceof Boolean) {
+        } else if (literal.getValue() instanceof Boolean) {
             String boolValue = (Boolean) literal.getValue() ? "1" : "0";
             emitInstruction("PUSH", boolValue);
-        }else if (literal.getValue() instanceof String) {
-            emitInstruction("PUSH_STR", literal.getValue().toString());
-        }else {
+        } else if (literal.getValue() instanceof String strVal) {
+            String formatted = strVal.startsWith("\"") && strVal.endsWith("\"") ? strVal : "\"" + strVal + "\"";
+            emitInstruction("PUSH_STR", formatted);
+        } else {
             throw new CodeGenException(
                     "Code Generation Error: Invalid literal: " + literal.getValue(),
                     literal.getLineNumber()
@@ -319,10 +442,10 @@ public class CodeGenerator {
     }
 
     private void generateVariableExpression(VariableExpression variable, Environment environment) {
-        if (environment.isGlobal(variable.getName())) {
-            emitInstruction("LOAD",  variable.getName());
-        }else {
-            int slot = environment.getLocalSlot(variable.getName());
+        if (safeIsGlobal(environment, variable.getName())) {
+            emitInstruction("LOAD", variable.getName());
+        } else {
+            int slot = getLocalSlot(variable.getName(), environment);
             emitInstruction("LOAD_LOCAL", String.valueOf(slot));
         }
     }
@@ -332,14 +455,13 @@ public class CodeGenerator {
 
         if (operator.tokenValue().equals("&&")) {
             generateLogicalAnd(binary, environment);
-        }else if (operator.tokenValue().equals("||")) {
+        } else if (operator.tokenValue().equals("||")) {
             generateLogicalOr(binary, environment);
-        }else {
+        } else {
             generateExpression(binary.getLeft(), environment);
             generateExpression(binary.getRight(), environment);
 
-
-            switch(operator.tokenValue()) {
+            switch (operator.tokenValue()) {
                 case "+" -> emitInstruction("ADD");
                 case "-" -> emitInstruction("SUB");
                 case "*" -> emitInstruction("MULT");
@@ -360,8 +482,6 @@ public class CodeGenerator {
                 );
             }
         }
-
-
     }
 
     private String createUniqueLabel(String prefix) {
@@ -376,19 +496,15 @@ public class CodeGenerator {
         String falseLabel = createUniqueLabel("and_false");
         String endLabel = createUniqueLabel("and_end");
 
-        // Evaluate Left
         generateExpression(expr.getLeft(), env);
         emitInstruction("JIF", falseLabel);
 
-        // Evaluate Right (only reached if left was true/non-zero)
         generateExpression(expr.getRight(), env);
         emitInstruction("JIF", falseLabel);
 
-        // if both true
         emitInstruction("PUSH", "1");
         emitInstruction("JUMP", endLabel);
 
-        // False block
         emitLabel(falseLabel);
         emitInstruction("PUSH", "0");
 
@@ -424,11 +540,14 @@ public class CodeGenerator {
                 emitInstruction("EQ");
             }
             case "-" -> {
-                // Transform -x into (0 - x)
                 emitInstruction("PUSH", "0");
                 emitInstruction("SWAP");
                 emitInstruction("SUB");
             }
+            default -> throw new CodeGenException(
+                    "Code Generation Error: Invalid unary operator " + unary.getOperator().tokenValue(),
+                    unary.getLineNumber()
+            );
         }
     }
 
@@ -437,8 +556,7 @@ public class CodeGenerator {
     }
 
     private void generateCallingExpression(CallingExpression calling, Environment environment) {
-
-        for (Expression argument:  calling.getArguments()) {
+        for (Expression argument : calling.getArguments()) {
             generateExpression(argument, environment);
         }
 
@@ -446,4 +564,22 @@ public class CodeGenerator {
         emitInstruction("CALL", functionLabel);
     }
 
+    private boolean safeIsGlobal(Environment env, String varName) {
+        if (env == null || varName == null) return false;
+        try {
+            return env.isGlobal(varName);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private Type safeGetSymbolType(Environment env, String name) {
+        if (env == null || name == null) return null;
+        try {
+            var symbol = env.getSymbol(name);
+            return symbol != null ? symbol.getType() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

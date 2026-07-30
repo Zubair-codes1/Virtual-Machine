@@ -135,16 +135,16 @@ public class CodeGenerator {
         String endLabel = createUniqueLabel("endLabel");
 
         generateExpression(ifStmt.getCondition(), environment);
-        emitInstruction("JIF", elseLabel);
-
-        generateStatement(ifStmt.getIfStatement(), environment);
 
         if (ifStmt.getElseStatement() != null) {
+            emitInstruction("JIF", elseLabel);
+            generateStatement(ifStmt.getIfStatement(), environment);
+
             emitLabel(elseLabel);
             generateStatement(ifStmt.getElseStatement(), environment);
-        }else {
-            emitLabel(endLabel);
         }
+
+        emitLabel(endLabel);
     }
 
     private void generateWhileStmt(WhileStatement whileStmt, Environment environment) {
@@ -181,7 +181,9 @@ public class CodeGenerator {
         emitLabel(endLabel);
     }
 
-    private void generateBlockStmt(BlockStatement blockStmt, Environment environment) {}
+    private void generateBlockStmt(BlockStatement blockStmt, Environment environment) {
+
+    }
 
     private void generateBreakStmt(BreakStatement breakStmt, Environment environment) {}
 

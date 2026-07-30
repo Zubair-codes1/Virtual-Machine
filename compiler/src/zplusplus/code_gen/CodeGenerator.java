@@ -38,6 +38,12 @@ public class CodeGenerator {
 
         emitGlobalVariables(statements, environment);
 
+        for (Statement statement : statements) {
+            if (!(statement instanceof ExpressionStatement)) {
+                generateStatement(statement, environment);
+            }
+        }
+
         return assemblyString.toString();
     }
 
@@ -146,8 +152,8 @@ public class CodeGenerator {
         generateStatement(ifStmt.getIfStatement(), environment);
         emitInstruction("JUMP", endLabel);
 
-        emitLabel(elseLabel);
         if (ifStmt.getElseStatement() != null) {
+            emitLabel(elseLabel);
             generateStatement(ifStmt.getElseStatement(), environment);
         }
 

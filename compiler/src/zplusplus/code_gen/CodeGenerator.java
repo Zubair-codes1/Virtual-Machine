@@ -201,7 +201,13 @@ public class CodeGenerator {
         emitInstruction("JUMP", currentEndLabel);
     }
 
-    private void generateReturnStmt(ReturnStatement returnStmt, Environment environment) {}
+    private void generateReturnStmt(ReturnStatement returnStmt, Environment environment) {
+        if (returnStmt.getReturnValue() != null) {
+            generateExpression(returnStmt.getReturnValue(), environment);
+        }
+
+        emitInstruction("RET");
+    }
 
     private void generateFuncDeclStmt(FunctionDeclarationStatement funcDeclStmt, Environment environment) {}
 

@@ -94,5 +94,6 @@ public class IOHandler implements InstructionHandler {
         }
 
         System.out.println("VM OUTPUT: " + sb);
+        virtualMachine.setHeapPointerAt(address);
     }
 }

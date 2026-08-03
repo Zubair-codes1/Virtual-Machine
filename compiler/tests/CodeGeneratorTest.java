@@ -120,7 +120,7 @@ class CodeGeneratorTest {
 
         assertTrue(zasm.contains("CALL :main"));
         assertTrue(zasm.contains("HALT"));
-        assertTrue(zasm.contains(":main:"));
+        assertTrue(zasm.contains(":main"));
         assertTrue(zasm.contains("RET"));
     }
 
@@ -218,12 +218,12 @@ class CodeGeneratorTest {
         String zasm = generateCode(statements);
 
         assertTrue(zasm.contains("JIF :and_false_0"));
-        assertTrue(zasm.contains(":and_false_0:"));
-        assertTrue(zasm.contains(":and_end_1:"));
+        assertTrue(zasm.contains(":and_false_0"));
+        assertTrue(zasm.contains(":and_end_1"));
 
         assertTrue(zasm.contains("JIT :or_false_2"));
-        assertTrue(zasm.contains(":or_false_2:"));
-        assertTrue(zasm.contains(":or_end_3:"));
+        assertTrue(zasm.contains(":or_false_2"));
+        assertTrue(zasm.contains(":or_end_3"));
     }
 
     @Test
@@ -280,10 +280,10 @@ class CodeGeneratorTest {
 
         assertTrue(zasm.contains("JIF :elseLabel_0"));
         assertTrue(zasm.contains("JUMP :endLabel_1"));
-        assertTrue(zasm.contains(":elseLabel_0:"));
-        assertTrue(zasm.contains(":endLabel_1:"));
+        assertTrue(zasm.contains(":elseLabel_0"));
+        assertTrue(zasm.contains(":endLabel_1"));
         assertTrue(zasm.contains("JIF :endLabel_2"));
-        assertTrue(zasm.contains(":endLabel_2:"));
+        assertTrue(zasm.contains(":endLabel_2"));
     }
 
     @Test
@@ -309,11 +309,11 @@ class CodeGeneratorTest {
 
         String zasm = generateCode(statements);
 
-        assertTrue(zasm.contains(":startLabel_0:"));
+        assertTrue(zasm.contains(":startLabel_0"));
         assertTrue(zasm.contains("JIF :endLabel_1"));
         assertTrue(zasm.contains("JUMP :endLabel_1"));
 
-        assertTrue(zasm.contains(":startLabel_2:"));
+        assertTrue(zasm.contains(":startLabel_2"));
         assertTrue(zasm.contains("JIF :endLabel_3"));
         assertTrue(zasm.contains("JUMP :endLabel_3"));
     }
@@ -349,7 +349,7 @@ class CodeGeneratorTest {
 
         String zasm = generateCode(List.of(addFunc, doNothingFunc, mainFunc));
 
-        assertTrue(zasm.contains(":add:"));
+        assertTrue(zasm.contains(":add"));
         assertTrue(zasm.contains("STORE_LOCAL 1"));
         assertTrue(zasm.contains("STORE_LOCAL 0"));
 

@@ -26,6 +26,7 @@ public class CodeGenerator {
     // Local slot tracking state for fallback/mock scope contexts
     private Map<String, Integer> fallbackLocalSlots;
     private int nextFallbackSlot;
+    private Map<String, Type> localVariableTypes;
 
     /**
      * Code generator constructor
@@ -36,6 +37,7 @@ public class CodeGenerator {
         this.breakStack = new Stack<>();
         this.fallbackLocalSlots = new HashMap<>();
         this.nextFallbackSlot = 0;
+        this.localVariableTypes = new HashMap<>();
     }
 
     public String generate(List<Statement> statements, Environment environment) {
@@ -197,10 +199,15 @@ public class CodeGenerator {
             emitDefaultValue(varDeclstmt);
         }
 
-        if (safeIsGlobal(environment, varDeclstmt.getVarName())) {
-            emitInstruction("STORE", varDeclstmt.getVarName());
+        String varName = varDeclstmt.getVarName();
+        // Fix: Parse type directly from the AST statement instead of environment lookup
+        Type varType = parseType(varDeclstmt.getTypeName());
+        localVariableTypes.put(varName, varType);
+
+        if (safeIsGlobal(environment, varName)) {
+            emitInstruction("STORE", varName);
         } else {
-            int localSlot = getLocalSlot(varDeclstmt.getVarName(), environment);
+            int localSlot = getLocalSlot(varName, environment);
             emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
         }
     }
@@ -340,6 +347,10 @@ public class CodeGenerator {
             if (!envHasSlot(environment, paramName)) {
                 fallbackLocalSlots.put(paramName, i);
             }
+
+            // Fix: Use parseType on the parameter's type string instead of safeGetSymbolType
+            Type paramType = parseType(params.get(i).type());
+            localVariableTypes.put(paramName, paramType);
         }
         nextFallbackSlot = Math.max(nextFallbackSlot, params.size());
 
@@ -369,14 +380,20 @@ public class CodeGenerator {
         }
 
         if (expr instanceof VariableExpression varExpr) {
-            Type symbolType = safeGetSymbolType(env, varExpr.getName());
+            String varName = varExpr.getName();
+
+            // 1. Check global environment first
+            Type symbolType = safeGetSymbolType(env, varName);
             if (symbolType != null) {
                 return symbolType;
             }
-            String name = varExpr.getName().toLowerCase();
-            if (name.contains("str") || name.contains("string") || name.contains("greet") || name.contains("text") || name.contains("msg") || name.equals("s")) {
-                return Type.STRING;
+
+            // 2. Check local tracked types (fixes local variable lookup failure)
+            if (localVariableTypes.containsKey(varName)) {
+                return localVariableTypes.get(varName);
             }
+
+            // Fallback default if completely unknown
             return Type.INT;
         }
 
@@ -384,10 +401,6 @@ public class CodeGenerator {
             Type symbolType = safeGetSymbolType(env, callExpr.getCallee());
             if (symbolType != null) {
                 return symbolType;
-            }
-            String name = callExpr.getCallee().toLowerCase();
-            if (name.contains("str") || name.contains("string") || name.contains("greet") || name.contains("text") || name.contains("msg") || name.equals("s")) {
-                return Type.STRING;
             }
             return Type.INT;
         }
@@ -405,6 +418,21 @@ public class CodeGenerator {
         }
 
         return Type.INT;
+    }
+
+    private Type parseType(String typeName) {
+        if (typeName == null) return Type.INT;
+        switch (typeName.toLowerCase().trim()) {
+            case "string", "str" -> {
+                return Type.STRING;
+            }
+            case "boolean", "bool" -> {
+                return Type.BOOLEAN;
+            }
+            default -> {
+                return Type.INT;
+            }
+        }
     }
 
     public void generatePrintStmt(PrintStatement stmt, Environment environment) {
@@ -505,7 +533,7 @@ public class CodeGenerator {
     }
 
     private void emitLabel(String labelName) {
-        assemblyString.append(labelName).append(":\n");
+        assemblyString.append(labelName).append("\n");
     }
 
     private void generateLogicalAnd(BinaryExpression expr, Environment env) {

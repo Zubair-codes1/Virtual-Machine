@@ -34,7 +34,7 @@ public class VirtualMachine {
         this.programCounter = 0;
         this.programStack = new Stack<>();
         this.callStack = new Stack<>();
-        this.heap = new byte[1000];
+        this.heap = new byte[4000];
         this.heapPointer = 0;
         this.programStorage = new ArrayList<>();
         this.executableInstructions = new ArrayList<>();
@@ -528,5 +528,9 @@ public class VirtualMachine {
      */
     public void setHeapPointer(int offset) {
         this.heapPointer = this.heapPointer + offset;
+    }
+
+    public void setHeapPointerAt(int offset) {
+        this.heapPointer = offset;
     }
 }

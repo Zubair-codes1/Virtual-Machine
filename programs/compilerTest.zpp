@@ -1,5 +1,42 @@
+def int add(int a, int b) {
+    return a + b;
+}
+
+def void checkValue(int val) {
+    if (val > 10) {
+        print("Value is greater than 10");
+    } else {
+        print("Value is 10 or less");
+    }
+}
+
 def int main() {
-    int x = 10;
-    print(x);
+    print("=== Starting Z++ Execution ===");
+
+    int x = 5;
+    int y = 7;
+    int result = add(x, y);
+
+    checkValue(result);
+
+    print("--- Running While Loop ---");
+    int counter = 0;
+    while (counter < 3) {
+        print("Inside while loop iteration");
+        counter = counter + 1;
+    }
+
+    print("--- Running For Loop ---");
+    for (int i = 0; i < 5; i = i + 1) {
+        if (i == 2) {
+            print("Reached threshold, exiting loop early");
+            break;
+        }
+    }
+
+    string z = "hello world";
+    print(z);
+
+    print("=== Program Finished Successfully ===");
     return 0;
 }

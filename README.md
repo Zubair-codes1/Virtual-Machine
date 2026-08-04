@@ -520,6 +520,6 @@ build. I do plan to add OOP at some point and follow a C++/Java type syntax for 
 the assembler and the virtual machine so that different object types can be accomodated.
 6. Why not a tree-walk interpreter? I decided not to go the route of a tree-walk interpreter as I specifically wanted
 to target my own assembly language. 
-4. Why JAR files? JAR files makes running programs on the VM much easier without understanding
+7. Why JAR files? JAR files makes running programs on the VM much easier without understanding
 the actual functionality of the VM and the assembler. This makes the project more accessible. I have used Maven
 to make building the system easier and then it can be ran through the JAR files.

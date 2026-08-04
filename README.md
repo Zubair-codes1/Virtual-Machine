@@ -13,16 +13,73 @@ years there has been an increase in malware designed to bypass them).
 ## **What is the ZVM?**
 
 The ZVM is a custom-built stack-based virtual machine that is turing complete and comes with a
-complete toolchain. This includes a custom ISA (Instruction Set Architecture), an assembler (along with a custom bytecode), 
-a virtual machine to run the programs, a global heap to store dynamic memory such as strings and the Zebugger (Debugger). Programs can either be run through binary or through
-the .asm files straight away. The ZVM has its own Fetch-Decode-Execute (FDE) cycle along with a program stack
-to manage its memory. It also uses a program counter (typical of CPUs) to keep track of lines allowing for both sequential
+complete toolchain. This includes a custom ISA (Instruction Set Architecture), a compiler (for my custom Z++ language)
+and an assembler (along with a custom bytecode), 
+a virtual machine to run the programs, a global heap to store dynamic memory such as strings and the Zebugger (Debugger). 
+Programs can either be run through binary or through the .asm files straight away. 
+The ZVM has its own Fetch-Decode-Execute (FDE) cycle along with a program stack to manage its memory. 
+It also uses a program counter (typical of CPUs) to keep track of lines allowing for both sequential
 and non-sequential (functions/recursion/loops) programs to be run.
+
+Programs can be compiled from Z++ (.zpp files) to assembly (.asm files), then to binary (.bin files) and then run on the
+virtual machine.
 
 ## **Program Structure**
 
 ```
 VirtualMachine/
+├── compiler/
+│   ├── src/
+│   │   ├── zplusplus/
+│   │   │   ├── ast/
+│   │   │   │   ├── AssignmentStatement.java
+│   │   │   │   ├── ASTNode.java
+│   │   │   │   ├── BinaryExpression.java
+│   │   │   │   ├── BlockStatement.java
+│   │   │   │   ├── BreakStatement.java
+│   │   │   │   ├── CallingExpression.java
+│   │   │   │   ├── Expressionjava
+│   │   │   │   ├── ExpressionStatement.java
+│   │   │   │   ├── ForStatement.java
+│   │   │   │   ├── FunctionDeclarationStatement.java
+│   │   │   │   ├── GroupingExpression.java
+│   │   │   │   ├── IfStatement.java
+│   │   │   │   ├── LiteralExpression.java
+│   │   │   │   ├── Parameter.java
+│   │   │   │   ├── PrintStatement.java
+│   │   │   │   ├── ReturnStatement.java
+│   │   │   │   ├── Statement.java
+│   │   │   │   ├── UnaryExpression.java
+│   │   │   │   ├── VariableDeclarationStatement.java
+│   │   │   │   ├── VariableExpression.java
+│   │   │   │   └── WhileStatement.java
+│   │   │   ├── code_gen/
+│   │   │   │   └── CodeGenerator.java
+│   │   │   ├── exceptions/
+│   │   │   │   ├── CodeGenException.java
+│   │   │   │   ├── CompilerException.java
+│   │   │   │   ├── SemanticException.java
+│   │   │   │   └── SyntaxException.java
+│   │   │   ├── lexer/
+│   │   │   │   ├── Lexer.java
+│   │   │   │   ├── Token.java
+│   │   │   │   └── TokenType.java
+│   │   │   ├── parser/
+│   │   │   │   └── Parser.java
+│   │   │   ├── sem_analysis/
+│   │   │   │   ├── symbol/
+│   │   │   │   │   ├── FunctionSymbol.java
+│   │   │   │   │   ├── Symbol.java
+│   │   │   │   │   └── VariableSymbol.java
+│   │   │   │   ├── Analyser.java
+│   │   │   │   ├── Environment.java
+│   │   │   │   └── Type.java
+│   │   └── └── Main.java
+│   └── tests/
+│       ├── AnalyserTest.java
+│       ├── CodeGeneratorTest.java
+│       ├── LexerTest.java
+│       └── ParserTest.java
 ├── assembler/
 │   ├── src/
 │   │   ├── Assembler.java
@@ -82,9 +139,16 @@ VirtualMachine/
 ## **ARCHITECTURE**
 
 ```
-[ Your Source Code ] (.asm)
+[ Your Source Code (Z++ file) ] (.zpp)
          │
          ▼
+ ┌───────────────┐
+ │   Zompiler    │ ──► Frontend: Lexer, Parser and AST
+ │  (Compiler)   │ ──► Backend: Semantic Analyser, Code generator
+ └───────────────┘
+         │
+         ▼
+[ Assembly code ] (.asm)
  ┌───────────────┐
  │   Zembler     │ ──► Pass 1: Scan Labels & Build Constant Pool
  │  (Assembler)  │ ──► Pass 2: Map Opcodes & Emit 12-byte Instructions
@@ -97,7 +161,7 @@ VirtualMachine/
  ┌───────────────┐
  │  ZVM Engine   │ ──► Dual Memory: [ Call Stack Frames ] (Local Variables)
  │   (Runtime)   │                  [ Global Byte Heap ] (Dynamic Strings)
- │               │ ──► Debugger (Accessed using --debug command when runnign vm.jar)  
+ │               │ ──► Debugger (Accessed using --debug command when running vm.jar)  
  └───────────────┘
 ```
 
@@ -113,6 +177,23 @@ to encode the instructions in binary using hex values. You can find the link to 
 [ISA Documentation](docs/ISA.md)  
 [Bytecode Format](docs/BYTECODE.md)
 
+## **Zompiler and Z++**
+
+The Zompiler (compiler) compiles Z++ source code and targets my own custom assembly language. The Z++ language
+is inspired by many other existing languages. It is a procedural language so far so it has no OOP. The syntax of it is
+similar to a Python and a C hybrid. For example, it requires a main() function for the program to run and it generally
+has all the main characteristics of C such as being statically types, specified return types, for loop structure etc.
+
+For function declarations it follows a mix of python and C, with the function declaration starting off with "def", then the
+return type of the function and then the function name and so on from there.
+
+Currently, the language only supports three main types, those being strings, ints and booleans but this will be expanded on
+in later updates to the compiler.
+
+To read more about the compiler you can read its seperate documentation page:
+
+[Z++ Documentation](docs/Z++.md)
+
 ## **Zebugger**
 
 The Zebugger (debugger) is one part of the ZVM's toolchain. Using a simple --debug command
@@ -125,21 +206,39 @@ which lines of the assembly are actually debugged.
 
 ## **Building The Project**
 
+Building the project can be done in two ways, either by using the precompiled executable jars that are posted on the
+latest version release on GitHub Versions or by downloading the entire source code and then running the following command:
+
 ```
-mvn package
+mvn clean package (or just 'mvn package')
 mvn test
+```
+
+To compiler, assembler and run Z++/assembly programs, the following commands are used. Note: If the precompiler jar files
+are downloaded there is no need to run compiler/target/compiler.jar or similiar for the assembler.jar and vm.jar as that is not
+necessary, however if the project is copied / forked, then this is necessary as Maven naturally places the compiler jar files
+in these locations. If the jar files are downloaded it is sufficient to just run "compiler.jar"/"assembler.jar"/"vm.jar"
+without specifying their paths. Both jar methods are given below.
+
+## **Compiling Programs**
+
+```asm
+java -jar compiler/target/compiler.jar <input.zpp> -o <output.asm>
+java -jar compiler.jar <input.zpp> -o <output.asm>
 ```
 
 ## **Assembling Programs**
 
-```
-java -jar assembler/target/assembler.jar <input.asm> -o <output.bin>
+```asm
+java -jar assembler/src/target/assembler.jar <input.asm> -o <output.bin>
+java -jar assembler.jar <input.asm> -o <output.bin>
 ```
 
 ## **Running Binary Programs**
 
 ```
 java -jar vm/target/vm.jar <program.bin>
+java -jar vm.jar <program.bin>
 ```
 
 ## **Debugging Binary Programs**
@@ -149,6 +248,76 @@ java -jar vm.jar <program.bin> --debug
 ```
 
 ## **Example Programs**
+
+## **Z++ Example**
+
+Test Program for Z++.
+
+```zpp
+def int add(int a, int b) {
+    return a + b;
+}
+
+def void checkValue(int val) {
+    if (val > 10) {
+        print("Value is greater than 10");
+    } else {
+        print("Value is 10 or less");
+    }
+}
+
+def int main() {
+    print("=== Starting Z++ Execution ===");
+
+    int x = 5;
+    int y = 7;
+    int result = add(x, y);
+
+    checkValue(result);
+
+    print("--- Running While Loop ---");
+    int counter = 0;
+    while (counter < 3) {
+        print("Inside while loop iteration");
+        counter = counter + 1;
+    }
+
+    print("--- Running For Loop ---");
+    for (int i = 0; i < 5; i = i + 1) {
+        if (i == 2) {
+            print("Reached threshold, exiting loop early");
+            break;
+        }
+    }
+
+    print("=== Program Finished Successfully ===");
+    return 0;
+}
+```
+
+**Compiler and Run**
+
+```
+java -jar compiler.jar compilerTest.zpp -o compilerTest.asm
+java -jar assembler.jar compilerTest.asm -o compilerTest.bin
+java -jar vm.jar compilerTest.bin
+```
+
+**Expected Output**
+
+```
+VM OUTPUT: === Starting Z++ Execution ===
+VM OUTPUT: Value is greater than 10
+VM OUTPUT: --- Running While Loop ---
+VM OUTPUT: Inside while loop iteration
+VM OUTPUT: Inside while loop iteration
+VM OUTPUT: Inside while loop iteration
+VM OUTPUT: --- Running For Loop ---
+VM OUTPUT: Reached threshold, exiting loop early
+VM OUTPUT: === Program Finished Successfully ===
+```
+
+## **Assembly Only Examples**
 
 ### Factorial
 

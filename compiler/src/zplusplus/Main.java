@@ -14,8 +14,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        if (args.length != 2 || !args[0].endsWith(".zpp") || !args[1].endsWith(".asm")) {
-            System.err.println("Error Usage: zcc <zpp file path> <asm file path>");
+        if (args.length != 3 || !args[0].endsWith(".zpp") || !args[1].equals("-o") || !args[1].endsWith(".asm")) {
+            System.err.println("Error Usage: zcc <zpp file path> -o <asm file path>");
             return;
         }
 

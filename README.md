@@ -471,6 +471,14 @@ VM OUTPUT: 34
 
 ## **Technical Details**
 
+The compiler is similar to most compilers but its unique in that it doesnt target a standard ISA such x86-64 or ARM64,
+rather it specifically targets my own assembly language that I created for the virtual machine. It follows the typical
+structure of a compiler with a frontend which is the lexer and parser duo (parser naturally includes the abstract syntrax tree as
+part of it) and also a backend which is the semantic analyser and the code generator. Typically there would be more steps such
+as the intermediate representation and maybe a linker but since I am targeting my own assembly code, I didn't see the need of
+doing these steps. The compiler is completely seperated from the assembler and the vm, so it only produces the assembly and
+leaves the assembling and execution to them.
+
 The Assembler runs on a two pass system. It first looks at the entire
 .asm file and strips it of comments, labels and empty lines. In the first pass
 it also builds a symbol table which includes all the labels and a constant pool.
@@ -503,6 +511,15 @@ so the second pass can encode every instruction correctly regardless of label or
 holding its local variables and return address. This makes recursion work naturally
 (each call is fully isolated) and lets me design LOCAL instructions that always target
 the active frame without any ambiguity.
+4. Why C based syntax? I decided to use syntax that is roughly equivalent to the syntax of C since most modern
+languages are based on C so it makes it easier for other programmers to pick up the language. I did however, incorporate
+other language techniques such as "def" from python becuase I liked the idea of having a specific keyword to indicate the
+start of a function.
+5. Why no OOP? For now, I have decided to leave the language as a procedural language as they are generally easier to
+build. I do plan to add OOP at some point and follow a C++/Java type syntax for it. It would also require some extra work with
+the assembler and the virtual machine so that different object types can be accomodated.
+6. Why not a tree-walk interpreter? I decided not to go the route of a tree-walk interpreter as I specifically wanted
+to target my own assembly language. 
 4. Why JAR files? JAR files makes running programs on the VM much easier without understanding
 the actual functionality of the VM and the assembler. This makes the project more accessible. I have used Maven
 to make building the system easier and then it can be ran through the JAR files.

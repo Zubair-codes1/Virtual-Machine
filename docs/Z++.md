@@ -180,4 +180,52 @@ true || false  -> true
 5 >= 5         -> true
 ```
 
+---
+## **Output**
+
+To make the virtual machine output values, we use the print() command. As of now, the print command only
+accepts string arguments so integers and booleans cannot be printed. As of now the language has no input
+mechanism but that will be added in future updates to the language.
+
+Example code:
+
+```
+print("Hello World!");
+```
+
+Or if variables are involved:
+
+```
+string x = "Hello World!";
+print(x);
+```
+
+Both will output:
+> Hello World!
+
+---
+## **Selection**
+
+Selection is an integral part of programming languages, it allows the program to go down multiple
+paths based on a certain condition. In the Z++ language this is limited to only two paths. These two paths
+are represented by "if" statements and "else" statements.
+
+Structure of an if-else statement:
+```
+if (condition) {
+    ...
+}else {
+    ...
+}
+```
+
+The condition part is any expression that returns a true or false value, if the condition is true then the program will
+execute the instructions/statements within the if block but if it is false then it will execute the instructions in the
+else block. However, the else part is not necessary and can be skipped, in which case nothing happens if the condition is false
+and the program continues with the next instructions after the if statement is complete.
+
+---
+## **Iteration/Loops**
+
+
 

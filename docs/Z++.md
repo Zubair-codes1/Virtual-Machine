@@ -45,6 +45,9 @@ they leave a value on the stack.
 Statements can have expressions within them , for example, a declaration statement (to declare a variable) may assign a value,
 values are a type of expression.
 
+Statements must also end with a semicolon to indicate the end of the statement, and so that the compiler can know when the next
+statement is starting.
+
 The reason form mentioning expressions and statements is that they help a programmer understand how code functions and what are
 the expected values that should be received.
 
@@ -107,6 +110,74 @@ def int main() {
     bool z = false;
     bool w = true;
 }
+```
+
+As seen above variables of type string are declared with the "string" keyword, boolean variables are declared with "bool",
+and integer variables are declared with "int".
+
+Common errors that people make include:
+1. Not surrounding strings with quotation marks.
+2. Surrounding integers with quotation marks -> No operations can be performed on this.
+3. Making boolean literals capitalised (e.g. True/False). This might be correct in other languages but in Z++ they are lowercase.
+
+---
+## **Operators**
+
+Operators in traditional maths are functions that take in values (or one value for unary operators) and produce another value.
+This is also true for programming languages, an operator takes in a value or multiple values and returns a new value.
+
+Math Operators: 
+1. assignment (=)
+2. plus (+)
+3. minus (-)
+4. multiply (*)
+5. divide (/)
+6. modulo (% - remainder of division)
+
+Logical Operators:
+1. Logical And (&& - true if both values are true, false otherwise)
+2. Logical Or (|| - true if either or both of the two values are true, false if none are true)
+3. Logical Not (! - true if false, and false if true) 
+
+Bitwise Operators:
+1. Bitwise And (& - 1 if both bits are 1)
+2. Bitwise Or (| - 1 if one or both bits are 1)
+3. Bitwise Xor (^ - 1 only if one bit is 1)
+4. Bitwise Not (~ - 1 if 0, 0 if 1 -> flips the bit around)
+
+Comparison Operators:
+1. Equality (==, true if both values are equal)
+2. Not Equal (!=, true if both values are not equal)
+3. Less than (<, true if left value is less than right value)
+4. Greater than (> , true if left value is greater than right value)
+5. Less than or equal to (<=, true if left value is less than or equal to right value)
+6. Greater than or equal to (>=, true if left value is greater than or equal to right value)
+
+Example code:
+
+```
+5 + 5          -> 10
+5 - 5          -> 0
+5 * 5          -> 30
+5 / 5          -> 1
+10 % 3         -> 1 (10 / 3 = 3 remainder 1)
+
+true && true   -> true
+true || false  -> true
+!true          -> false
+!false         -> true
+
+1 & 1          -> 1
+1 | 0          -> 1
+1 ^ 0          -> 1
+~1             -> 0
+
+5 == 5         -> true
+5 != 5         -> false
+5 < 5          -> false
+5 > 5          -> false
+5 <= 5         -> true
+5 >= 5         -> true
 ```
 
 

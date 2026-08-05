@@ -9,6 +9,7 @@ I decided to follow this syntax for my language to make it easier for programmer
 As of now the language has all the standard programming techniques such as selection, iteration, functions etc. however,
 it is not very feature-rich. I have explained the syntax along with some examples below.
 
+---
 ## **main()**
 
 Similar to C, the language requires a main function as the starting off point for the execution of code, this is because
@@ -32,6 +33,64 @@ The only difference from C is the "def" keyword. I decided to include this in my
 a specific keyword to indicate the start of a function just like in python with "def" or in Rust with "fn" as it helps
 make the program more readable.
 
+---
+## **Statements vs Expressions**
+
+Generally within programming languages, there are two main types of nodes within a syntax, these being statements and expressions.
+Statements are lines of code / or parts of a line of code that do not produce a value, meaning that from the start of a statements
+execution to the end of it, the net value output should be 0. Since my virtual machine is stack-based, a statement should not leave
+a value on the stack after it has finished execution. Expressions on the other hand, do return a value or in the case of the VM,
+they leave a value on the stack.
+
+Statements can have expressions within them , for example, a declaration statement (to declare a variable) may assign a value,
+values are a type of expression.
+
+The reason form mentioning expressions and statements is that they help a programmer understand how code functions and what are
+the expected values that should be received.
+
+Examples of expressions:
+
+```
+5           ->      literal expression
+5 + 10      ->      binary expression (two operators)
+(5 + 10)    ->      grouping expression (with a binary expression within it)
+-5          ->      unary expression (one operator)
+!true       ->      also unary expression
+x           ->      variable expression
+func()      ->      calling expression (calls a function)
+```
+
+Examples of statements:
+
+```
+x = 5;      ->      assignment statement
+int x = 5;  ->      variable declaration statement
+return x;   ->      return statement
+...
+```
+
+## **Variables**
+Variables are symbols used in a language that identify data. Variable are names given to data, and that name can then be used
+throughout the lifetime of the variable (lifetime of variables discussed under the section on scope) as a substitute for the data.
+This is similar to how variables are used in traditional maths such as x = 5. The value x can then be used in any other equation
+to represent 5. For example, y = x + 5, would result in y = 5 + 5 and thus y = 10.
+
+Example code:
+
+```
+def void main() {
+    int x = 5;
+    int y = 10;
+    
+    int z = x + y;
+}
+```
+
+As shown from the above code, the value 5 is stored in the variable x and the value 10 is stored in the variable y, these variables
+can then be used instead of their corresponding values in later parts of the program as we see with:
+> int z = x + y;
+
+---
 ## **Data Types**
 
 As of now the Z++ language only has three main types, those being strings, booleans and integers. Strings are a collection of

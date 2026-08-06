@@ -93,6 +93,23 @@ As shown from the above code, the value 5 is stored in the variable x and the va
 can then be used instead of their corresponding values in later parts of the program as we see with:
 > int z = x + y;
 
+Note: Variables in Z++ are only allowed to have certain characters within them. They generally follow these rules:
+1. Must start with an alphabetical character - so no numbers or other symbols starting the variable name
+2. Can contain alphabetical, numerical and the underscore (_) character in any of the other positions
+
+Valid/Invalid Variable names examples:
+```
+x       -> valid
+y       -> valid
+x3      -> valid
+x_y     -> valid
+
+1x      -> invalid
+_x      -> invalid
+x%      -> invalid
+```
+
+
 ---
 ## **Data Types**
 
@@ -398,7 +415,7 @@ Break statements can also be used with for loops.
 ### **Nesting**
 
 Nesting in reference to loops, refers to the idea of having multiple loops within each other (hence nested). This can be really
-useful for performing multiple tasks within a loop but it should be used carefully as nested loops can drastically increase the 
+useful for performing multiple tasks within a loop, but it should be used carefully as nested loops can drastically increase the 
 time complexity of the program. For example for two nested loops the general time complexity is given by O(n^2) meaning that
 for n input values, the algorithm will take n^2 time which is frankly unuseable with decently large inputs.
 
@@ -415,7 +432,7 @@ def void main() {
 ```
 
 This code will output "Hello World!" 25 times. Notice how the variable used each time must be different, so it's not allowed to
-declare the same variable for two for loops within each other or anywhere in a the same scope to be exact (we will see more about
+declare the same variable for two for loops within each other or anywhere in the same scope to be exact (we will see more about
 this in the topic of scopes/lifetime of variables).
 
 Nesting allows for multiple loops within each other no matter the type of loop. So you can have 30 while loops nested inside a
@@ -424,5 +441,76 @@ for loop and that would be perfectly valid syntactically (although its probably 
 Generally, too much nesting should be avoided. A lot of algorithms can be done without nesting loops, and many can be done
 with one loop inside another. Generally any more than this is considered as a waste and as a programmer you should consider different
 ways of getting the solution without nesting too much.
+---
+
+## **Functions**
+
+Functions are an essential part of programming languages, and they are quite similar to the functions in mathematics.
+For example, in maths, you could have a function such as f(x) = x + 5. This function takes an input x, and returns that value
+plus five. Similarly, in maths we can write g(y) = y + f(6). This is a function that is calls another function,
+so function calls act like replacements for the actual statements within thme.
+
+Functions in programming are similar as they CAN take in a value and CAN return a value. Notice that I said "CAN". This is because
+a function in programming doesn't necessarily have to take an input and doesn't necessarily have to return a value; The most type of
+function is one that is a few statements.
+
+We have actually seen functions for Z++ before, with the main() function.
+
+Example of another function:
+```
+def void func1() {
+    print("Hello World!");
+}
+```
+
+Each function has a name. This function's name is "func1", the rules for function names are the same as for variables names as both
+function and variable names come under the same category of identifiers/symbols.
+
+The "def" keyword indicates the start of a function declaration and then right after it the return type is given. Return types
+tell the compiler that this function must return an expression of that particular type. The return types are the same as the
+data types: string, int and bool but also include a special return type called "void". This return type tells the compiler that
+the function won't actually return anything to the user - since Z++ runs on a VM, this means that when the function is called,
+no values will be left on the stack after the function call finishes.
+
+After the return type, then the functions name is given. It must be noted that function names must be unique, and you cannot have multiple
+functions with the same name. Other languages allow for something called function overloading and overriding however these functionalities
+do not exist within Z++ yet.
+
+As mentioned already, "void" functions don't need to return anything but other functions do, so how is this returning done?
+Returning is done through the "return" command. The return command can take a value to return.
+
+Example of return usage;
+
+```
+def int add(int x, int y) {
+    return x + y;
+}
+```
+
+As shown here, to return a value, we just write return then follow it up with an expression. It must be noted that once a return
+statement is processed, the function is exited and the program returns back to the function that called this function.
+
+In this example, we also see our first use of parameters (or inputs). When this function is called, values must be passed into the function
+and then these values are stored in the variables x and y respectively. It's similar to variable initialisation but instead of
+"=" being used, the initialisation occurs as the values are passed in.
+
+Example of calling a function:
+
+```
+def void main() {
+    int total = add(5, 3);
+    func1();
+}
+```
+
+When calling a function, we reference its name and then within parentheses we pass values (arguments) into the parameters of the function.
+For functions that do not have any parameters, then nothing is to be passed in as this would be an error. Also, functions that return
+values such as the add() function, can be assigned to variables since the add() function will be replaced by its return
+expression at runtime. They can also not be assigned to an input but in this scenario the programmer loses out on the return value.
+As for "void" functions, then they can't be assigned to variables as they do not return any values however,
+they can be used without doing so as shown above.
+
+Functions can also contain previously discussed parts of the language such as loops and selection.
+
 
 

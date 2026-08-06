@@ -441,6 +441,7 @@ for loop and that would be perfectly valid syntactically (although its probably 
 Generally, too much nesting should be avoided. A lot of algorithms can be done without nesting loops, and many can be done
 with one loop inside another. Generally any more than this is considered as a waste and as a programmer you should consider different
 ways of getting the solution without nesting too much.
+
 ---
 
 ## **Functions**

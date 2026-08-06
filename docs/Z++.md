@@ -150,7 +150,7 @@ Math Operators:
 4. multiply (*)
 5. divide (/)
 6. modulo (% - remainder of division)
-
+ 
 Logical Operators:
 1. Logical And (&& - true if both values are true, false otherwise)
 2. Logical Or (|| - true if either or both of the two values are true, false if none are true)

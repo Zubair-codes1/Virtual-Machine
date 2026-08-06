@@ -190,14 +190,18 @@ mechanism but that will be added in future updates to the language.
 Example code:
 
 ```
-print("Hello World!");
+def void main() {
+    print("Hello World!");
+}
 ```
 
 Or if variables are involved:
 
 ```
-string x = "Hello World!";
-print(x);
+def void main () {
+    string x = "Hello World!";
+    print(x);
+}
 ```
 
 Both will output:
@@ -224,8 +228,108 @@ execute the instructions/statements within the if block but if it is false then 
 else block. However, the else part is not necessary and can be skipped, in which case nothing happens if the condition is false
 and the program continues with the next instructions after the if statement is complete.
 
+Example code:
+
+```
+int x = 5;
+if (x > 2) {
+    print("x is greater than 2");
+} else {
+    print("x is less than 2");
+}
+```
+
+Output:
+
+> x is greater than 2
+
 ---
 ## **Iteration/Loops**
 
+Iteration, or looping, is one of the other core components of a programming language this is because it allows a section
+of code to be repeated multiple times. Most languages have multiple types of loops such as a for loop, while loop, for-each 
+loop, do-while loop etc. However, I have limited my language to only the for and while loops as the other types of loops
+can be expressed with just these two. Underneath the hood, the while loop and the for loop actually function exactly the same
+when it comes to the structure of the assembly they compile into, however they only differ in how a programmer writes them.
+
+### **While loops**
+
+Our first type of loop is a while loop. While loops are called condition-controlled loops as a block of code (group of statements)
+will execute as long as a condition is true, similar to an if statement but many iterations.
+
+The basic structure of a while loop is as follows:
+
+```
+while (condition) {
+    ...
+}
+```
+
+Example code:
+
+```
+int x = 5;
+while (x > 2) {
+    print("Hello World!");
+}
+```
+
+This code first declares and initialises a variable called x with a value of 5. Then it checks the while loop condiiton, which
+returns true as 5 > 2, thus it proceeds into the while loop and executes the statements within it (in this case it just prints
+hello world).
+
+Now, whilst this piece of code may be correct syntactically (meaning that the compiler will not notice any syntax errors with it
+and hence won't throw an error), there is still a logical error in this program (logical errors refer to the errors made by the
+programmer despite the code working correctly in terms of its syntax). Can you spot it? If you said that the loop will loop run
+forever, then you are correct!
+
+As seen by the code, every single time the statements within the loop end, it goes back up and checks the condition again,
+it keeps on doing this until the condition is false. However, in our scenario the condition is never false since 5 is always
+greater than 2. Thus, this code will loop forever. To fix this we need to change the code so that x value will decrease over
+a few iterations of the loop and there will eventually come an iteration where x is no longer greater than 2.
+
+Fixed code:
+
+```
+int x = 5;
+while (x > 2) {
+    print("Hello World!");
+    x = x - 1;
+}
+```
+
+This will output:
+```
+Hello World!
+Hello World!
+Hello World!
+```
+
+In this instance, we broke out of the while loop by making the condition false, however we can also break out of the for loop
+using a "break" statement. The break statement exits the loop that it is currently within, not any other loops or parent loops
+(this will be discussed more in the topic of nesting).
+
+Example:
+
+```
+int x = 6;
+while (x > 2) {
+    print("Hello World!");
+    
+    if (x == 4) {
+        break;
+    }
+    
+    x = x - 1;
+}
+```
+
+This code is similar to the previous code, but instead of the x value running down till 2 then the loop stopping, instead,
+it will stop as when it hits x = 4 (after it has printed that is).
+
+As you can also tell from the code above, if statements can be used inside while loops, similarly whiile loops can be used inside
+if statements. The reason for this is that '{' and '}' indicate the start of a block of code. A block of code contains a list of
+statements. If statements and while statements also come under that so they can be used within each other, and you can also have
+multiple while loops inside each other (this is called nesting and will be discussed a bit later).
 
 

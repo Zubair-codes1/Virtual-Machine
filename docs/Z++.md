@@ -512,5 +512,33 @@ they can be used without doing so as shown above.
 
 Functions can also contain previously discussed parts of the language such as loops and selection.
 
+---
+## **Scope/Lifetime**
 
+The scope of a variable is the location that it can be used within. Variables that are declared within a specific block of code
+can only be used within that block of code. Variables that are declared within a block are called locally scoped variables.
+
+In Z++ variables can also be declared outside a block of code and these are called global variables. Global variables can be used
+throughout the entire file.
+
+If two variables of the same name are used in the same scope then this will result in a compiler error but if they are used
+within different scopes then there is no issue in this as each scope will only use the value of its own variable and will not have access
+to the variable from the other scope.
+
+The lifetime of a variable indicates how long that variable can be used. Variables cannot be used before they are declared
+i.e. before their lifetime starts but can be used at any time after that until the end of their scope.
+
+Example:
+
+```
+def void main() {
+    ...
+    int x = 3;      # lifetime of variable x starts here
+    ...
+}                   # lifetime of variable x ends here - at the end of the scope
+```
+
+---
+
+These are the most important concepts within the Z++ language.
 

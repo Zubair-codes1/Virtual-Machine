@@ -217,7 +217,7 @@ are represented by "if" statements and "else" statements.
 Structure of an if-else statement:
 ```
 if (condition) {
-    ...
+...
 }else {
     ...
 }
@@ -231,11 +231,13 @@ and the program continues with the next instructions after the if statement is c
 Example code:
 
 ```
-int x = 5;
-if (x > 2) {
-    print("x is greater than 2");
-} else {
-    print("x is less than 2");
+def void main() {
+    int x = 5;
+    if (x > 2) {
+        print("x is greater than 2");
+    } else {
+        print("x is less than 2");
+    }
 }
 ```
 
@@ -268,9 +270,11 @@ while (condition) {
 Example code:
 
 ```
-int x = 5;
-while (x > 2) {
-    print("Hello World!");
+def void main() {
+    int x = 5;
+    while (x > 2) {
+        print("Hello World!");
+    }
 }
 ```
 
@@ -291,11 +295,14 @@ a few iterations of the loop and there will eventually come an iteration where x
 Fixed code:
 
 ```
-int x = 5;
-while (x > 2) {
-    print("Hello World!");
-    x = x - 1;
+def void main() {
+    int x = 5;
+    while (x > 2) {
+        print("Hello World!");
+        x = x - 1;
+    }
 }
+
 ```
 
 This will output:
@@ -312,15 +319,17 @@ using a "break" statement. The break statement exits the loop that it is current
 Example:
 
 ```
-int x = 6;
-while (x > 2) {
-    print("Hello World!");
-    
-    if (x == 4) {
-        break;
+def void main() {
+    int x = 6;
+    while (x > 2) {
+        print("Hello World!");
+        
+        if (x == 4) {
+            break;
+        }
+        
+        x = x - 1;
     }
-    
-    x = x - 1;
 }
 ```
 
@@ -331,5 +340,89 @@ As you can also tell from the code above, if statements can be used inside while
 if statements. The reason for this is that '{' and '}' indicate the start of a block of code. A block of code contains a list of
 statements. If statements and while statements also come under that so they can be used within each other, and you can also have
 multiple while loops inside each other (this is called nesting and will be discussed a bit later).
+
+### **For loops**
+
+For loops are the other type of loop that Z++ allows programmers to use. It is slighly different in that, it does have a condition
+but usually this condition is related the numerical values whilst in while loops it can be pretty much anything.
+
+Here is the basic syntax of a for loop:
+
+```
+for (intialisation; condition; update) {
+    ...
+}
+```
+
+Notice that a for loop has three main parts within its parentheses. The intitialisation part allows you to intitialise a variable
+to a certain value, then the condition part is what is checked for the for loop to run. The expression at the end is run right at the end
+of the for loop and typically updates the variable that was initialised.
+
+Example code:
+
+```
+def void main() {
+    for (int x = 0; x < 5; x = x + 1) {
+        print("Hello World!");
+    }
+}
+```
+
+Output:
+
+```
+Hello World!
+Hello World!
+Hello World!
+Hello World!
+Hello World!
+```
+
+For loops and while loops have equivalent expressive power, meaning that a while loop can be rewritten as a for loop and
+a for loop can be rewritten as a while loop with just a few adjustments.
+
+While loop version of the previous code:
+
+```
+def void main() {
+    int x = 0;
+    while (x < 5) {
+        print("Hello World!");
+        x = x + 1;
+    }
+}
+```
+
+Break statements can also be used with for loops.
+
+### **Nesting**
+
+Nesting in reference to loops, refers to the idea of having multiple loops within each other (hence nested). This can be really
+useful for performing multiple tasks within a loop but it should be used carefully as nested loops can drastically increase the 
+time complexity of the program. For example for two nested loops the general time complexity is given by O(n^2) meaning that
+for n input values, the algorithm will take n^2 time which is frankly unuseable with decently large inputs.
+
+Example code:
+
+```
+def void main() {
+    for (int x = 0; x < 5; x = x + 1) {
+        for (int y = 0; y < 5; y = y + 1) {
+            print("Hello World!");
+        }
+    }
+}
+```
+
+This code will output "Hello World!" 25 times. Notice how the variable used each time must be different, so it's not allowed to
+declare the same variable for two for loops within each other or anywhere in a the same scope to be exact (we will see more about
+this in the topic of scopes/lifetime of variables).
+
+Nesting allows for multiple loops within each other no matter the type of loop. So you can have 30 while loops nested inside a
+for loop and that would be perfectly valid syntactically (although its probably not best speed wise).
+
+Generally, too much nesting should be avoided. A lot of algorithms can be done without nesting loops, and many can be done
+with one loop inside another. Generally any more than this is considered as a waste and as a programmer you should consider different
+ways of getting the solution without nesting too much.
 
 

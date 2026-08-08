@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        if (args.length != 3 || !args[0].endsWith(".zpp") || !args[1].equals("-o") || !args[1].endsWith(".asm")) {
+        if (args.length != 3 || !args[0].endsWith(".zpp") || !args[1].equals("-o") || !args[2].endsWith(".asm")) {
             System.err.println("Error Usage: zcc <zpp file path> -o <asm file path>");
             return;
         }
@@ -31,7 +31,7 @@ public class Main {
             CodeGenerator codeGenerator = new CodeGenerator();
             String assembly = codeGenerator.generate(statements, environment);
 
-            Files.write(Paths.get(args[1]), assembly.getBytes());
+            Files.write(Paths.get(args[2]), assembly.getBytes());
 
         } catch (IOException e) {
             System.err.println("Compiler Error: Could not read or write file - " + e.getMessage());

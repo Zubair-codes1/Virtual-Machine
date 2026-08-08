@@ -625,10 +625,34 @@ class AnalyserTest {
         }
 
         @Test
+        @DisplayName("Print statement with integer expression")
+        void testValidPrintInteger() {
+            assertDoesNotThrow(() -> analyse(
+                    new PrintStatement(new LiteralExpression(5, 1), 1)
+            ));
+        }
+
+        @Test
+        @DisplayName("Print statement with boolean expression true")
+        void testValidPrintBooleanTrue() {
+            assertDoesNotThrow(() -> analyse(
+                    new PrintStatement(new LiteralExpression(true, 1), 1)
+            ));
+        }
+
+        @Test
+        @DisplayName("Print statement with boolean expression false")
+        void testValidPrintBooleanFalse() {
+            assertDoesNotThrow(() -> analyse(
+                    new PrintStatement(new LiteralExpression(false, 1), 1)
+            ));
+        }
+
+        @Test
         @DisplayName("Print statement with non-string expression throws SemanticException")
         void testInvalidPrint() {
             assertThrows(SemanticException.class, () -> analyse(
-                    new PrintStatement(new LiteralExpression(123, 1), 1)
+                    new PrintStatement(null, 1)
             ));
         }
 

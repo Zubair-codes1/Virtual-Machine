@@ -341,9 +341,10 @@ public class Analyser {
     }
 
     private void analysePrint(PrintStatement printStatement) {
-        if (analyseExpression(printStatement.getExpression()) != Type.STRING) {
+        if (analyseExpression(printStatement.getExpression()) == Type.VOID ||
+        analyseExpression(printStatement.getExpression()) == Type.ERROR) {
             throw new SemanticException(
-                    "Semantic Error: Invalid print statement, must be a string expression",
+                    "Semantic Error: Invalid print statement, must be a string/int/boolean expression",
                     printStatement.getLineNumber()
             );
         }

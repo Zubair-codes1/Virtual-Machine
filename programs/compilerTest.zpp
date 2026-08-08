@@ -17,6 +17,8 @@ def int main() {
     int y = 7;
     int result = add(x, y);
 
+    print(result);
+
     checkValue(result);
 
     print("--- Running While Loop ---");

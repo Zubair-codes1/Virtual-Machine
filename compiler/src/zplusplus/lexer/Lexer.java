@@ -294,6 +294,7 @@ public class Lexer {
                 case "return": tokens.add(new Token(TokenType.RETURN, stringResult, lineNumber)); break;
                 case "break": tokens.add(new Token(TokenType.BREAK, stringResult, lineNumber)); break;
                 case "print": tokens.add(new Token(TokenType.PRINT, stringResult, lineNumber)); break;
+                case "input": tokens.add(new Token(TokenType.INPUT, stringResult, lineNumber)); break;
                 case "int": tokens.add(new Token(TokenType.INT_TYPE, stringResult, lineNumber)); break;
                 case "string": tokens.add(new Token(TokenType.STRING_TYPE, stringResult, lineNumber)); break;
                 case "bool": tokens.add(new Token(TokenType.BOOLEAN_TYPE, stringResult, lineNumber)); break;

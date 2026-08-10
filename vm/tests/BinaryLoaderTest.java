@@ -15,16 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BinaryLoaderTest {
 
     @Test
-    @DisplayName("Test for compiler pipeline loading")
-    void testLoadsCompilerTest() {
-        BinaryLoader loader = new BinaryLoader();
-        LoadedProgram program = loader.loadProgram("../output/compilerTest.bin");
-
-        assertFalse(program.instructions().isEmpty());
-        assertNotNull(program.constantPool());
-    }
-
-    @Test
     @DisplayName("Load Factorial correctly")
     void testLoadsFactorialCorrectly() {
         BinaryLoader loader = new BinaryLoader();

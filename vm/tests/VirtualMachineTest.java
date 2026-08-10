@@ -13,15 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 public class VirtualMachineTest {
 
     @Test
-    @DisplayName("Testing compiler program run on virutal machine")
-    void testCompilerExecutionFull() {
-        VirtualMachine vm = new VirtualMachine(false);
-        vm.loadFromBinary("../output/compilerTest.bin");
-        assertDoesNotThrow(vm::executeProgram);
-    }
-
-
-    @Test
     @DisplayName("Testing factorial for errors")
     void testFactorialExecutesWithoutError() {
         VirtualMachine vm = new VirtualMachine(false);

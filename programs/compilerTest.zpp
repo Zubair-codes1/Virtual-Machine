@@ -10,7 +10,7 @@ def void checkValue(int val) {
     }
 }
 
-def int main() {
+def void main() {
     print("=== Starting Z++ Execution ===");
 
     int x = 5;
@@ -18,6 +18,10 @@ def int main() {
     int result = add(x, y);
 
     print(result);
+
+    string l;
+
+    print(l);
 
     checkValue(result);
 
@@ -40,5 +44,4 @@ def int main() {
     print(z);
 
     print("=== Program Finished Successfully ===");
-    return 0;
 }

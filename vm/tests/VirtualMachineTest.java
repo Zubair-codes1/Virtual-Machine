@@ -20,6 +20,7 @@ public class VirtualMachineTest {
         assertDoesNotThrow(vm::executeProgram);
     }
 
+
     @Test
     @DisplayName("Testing factorial for errors")
     void testFactorialExecutesWithoutError() {

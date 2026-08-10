@@ -61,7 +61,7 @@ public class Parser {
     private boolean isStatement() {
         List<TokenType> tokenTypes = List.of(
                 TokenType.IF, TokenType.WHILE, TokenType.FOR, TokenType.RETURN,
-                TokenType.BREAK, TokenType.PRINT, TokenType.LEFT_BRACE
+                TokenType.BREAK, TokenType.PRINT, TokenType.INPUT, TokenType.LEFT_BRACE
         );
         return match(tokenTypes);
     }
@@ -82,6 +82,7 @@ public class Parser {
                 case RETURN -> statement = handleReturnStatement();
                 case BREAK -> statement = handleBreakStatement();
                 case PRINT -> statement = handlePrintStatement();
+                case INPUT -> statement = handleInputStatement();
                 case LEFT_BRACE -> statement = handleLeftBraceStatement();
                 default -> statement = handleOtherStatements();
             }
@@ -546,9 +547,29 @@ public class Parser {
             blockStatements.add(statement);
         }
 
-        Token rightBraceToken = consume(TokenType.RIGHT_BRACE, "Syntax Error: Missing '}' at end of block statement.");
+        Token rightBraceToken = consume(TokenType.RIGHT_BRACE, "Syntax Error: Missing '}' at end of block statement");
 
         return new BlockStatement(blockStatements, rightBraceToken.lineNumber());
+    }
+
+    private Statement handleInputStatement() {
+        Token inputToken = advance();
+        consume(TokenType.LEFT_PAREN, "Syntax Error: Missing '(' at start of input statement");
+
+        if (peekToken().type() != TokenType.IDENTIFIER) {
+            throw new SyntaxException(
+                    "Syntax Error: Missing variable name in input statement ",
+                    inputToken.lineNumber()
+            );
+        }
+
+        Token variable = advance();
+        String variableName = variable.tokenValue();
+
+        consume(TokenType.RIGHT_PAREN, "Syntax Error: Missing ')' at end of input statement");
+        consume(TokenType.SEMICOLON, "Syntax Error: Expected ';' at end of input statement");
+
+        return new InputStatement(variableName, inputToken.lineNumber());
     }
 
     private Statement handleOtherStatements() {

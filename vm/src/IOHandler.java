@@ -1,3 +1,4 @@
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -57,16 +58,37 @@ public class IOHandler implements InstructionHandler {
      */
     private void handleInput(VirtualMachine virtualMachine) throws VirtualMachineException {
         Scanner sc = new Scanner(System.in);
-        System.out.print("> INPUT REQUIRED (Integer): ");
 
-        // Check if the next token is actually a number
-        while (!sc.hasNextInt()) {
-            System.out.println("Error: That's not a valid integer. Try again.");
-            System.out.print("> ");
-            sc.next(); // Clear the "bad" input from the buffer
+        String stringValue = sc.nextLine();
+        byte[] stringBytes = stringValue.getBytes(StandardCharsets.US_ASCII);
+        int length = stringBytes.length;
+
+        final int LENGTH_PREFIX = 4;
+        int totalBytes = LENGTH_PREFIX + length;
+
+        int startingAddress = virtualMachine.getHeapPointer();
+        byte[] heap = virtualMachine.getHeap();
+
+        // check if heap is big enough
+        if (startingAddress + totalBytes > heap.length) {
+            throw new VirtualMachineException("Error: Heap overflow during INPUT!");
         }
-        int value = sc.nextInt();
-        virtualMachine.getStack().push(value);
+
+        // push the length values as 4 bytes
+        heap[startingAddress]     = (byte) ((length >> 24) & 0xFF);
+        heap[startingAddress + 1] = (byte) ((length >> 16) & 0xFF);
+        heap[startingAddress + 2] = (byte) ((length >> 8)  & 0xFF);
+        heap[startingAddress + 3] = (byte) (length         & 0xFF);
+
+        // adding the rest of the characters
+        for (int i = 0; i < length; i++) {
+            heap[startingAddress + LENGTH_PREFIX + i] = stringBytes[i];
+        }
+
+        // pointer set to the next empty space on the heap
+        virtualMachine.setHeapPointer(startingAddress + totalBytes + 1);
+        // starting address pushed to stack
+        virtualMachine.getStack().push(startingAddress);
     }
 
     /**

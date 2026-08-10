@@ -66,6 +66,7 @@ public class Analyser {
             case FunctionDeclarationStatement functionDeclarationStatement ->
                     analyseFuncDecl(functionDeclarationStatement);
             case PrintStatement printStatement -> analysePrint(printStatement);
+            case InputStatement inputStatement -> analyseInput(inputStatement);
             case ExpressionStatement expressionStatement -> analyseExpression(expressionStatement.getExpression());
             default -> throw new SemanticException("Semantic Error: Not a valid statement", statement.getLineNumber());
         }
@@ -346,6 +347,15 @@ public class Analyser {
             throw new SemanticException(
                     "Semantic Error: Invalid print statement, must be a string/int/boolean expression",
                     printStatement.getLineNumber()
+            );
+        }
+    }
+
+    private void analyseInput(InputStatement inputStatement) {
+        if (currentEnvironment.getSymbol(inputStatement.getVariable()).getType() != Type.STRING) {
+            throw new SemanticException(
+                    "Semantic Error: Invalid input statement, variable must be of type string",
+                    inputStatement.getLineNumber()
             );
         }
     }

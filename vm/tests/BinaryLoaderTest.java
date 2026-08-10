@@ -1,10 +1,31 @@
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import java.io.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Class to test if the binary loader works correctly,
+ * tests fully assembled programs and also a program that is
+ * compiled first then assembled to check full compiler + assembler
+ * pipeline.
+ *
+ * @author Zubair Abdul Matin
+ */
 public class BinaryLoaderTest {
 
     @Test
+    @DisplayName("Test for compiler pipeline loading")
+    void testLoadsCompilerTest() {
+        BinaryLoader loader = new BinaryLoader();
+        LoadedProgram program = loader.loadProgram("../output/compilerTest.bin");
+
+        assertFalse(program.instructions().isEmpty());
+        assertNotNull(program.constantPool());
+    }
+
+    @Test
+    @DisplayName("Load Factorial correctly")
     void testLoadsFactorialCorrectly() {
         BinaryLoader loader = new BinaryLoader();
         LoadedProgram program = loader.loadProgram("../output/factorial.bin");
@@ -12,6 +33,7 @@ public class BinaryLoaderTest {
     }
 
     @Test
+    @DisplayName("Lod constant pool correctly from factorial program")
     void testConstantPoolLoadsCorrectly() {
         BinaryLoader loader = new BinaryLoader();
         LoadedProgram program = loader.loadProgram("../output/factorial.bin");
@@ -19,6 +41,7 @@ public class BinaryLoaderTest {
     }
 
     @Test
+    @DisplayName("Test for non-existent file")
     void testNonExistentFileThrows() {
         BinaryLoader loader = new BinaryLoader();
         assertThrows(VirtualMachineException.class, () -> {
@@ -27,6 +50,7 @@ public class BinaryLoaderTest {
     }
 
     @Test
+    @DisplayName("Test invalid magic numbers")
     void testInvalidMagicNumberThrows() throws IOException {
         File fakeFile = new File("../output/fake.bin");
         try{
@@ -49,6 +73,7 @@ public class BinaryLoaderTest {
     }
 
     @Test
+    @DisplayName("Test fibonacci program")
     void testFibonacciLoadsCorrectly() {
         BinaryLoader loader = new BinaryLoader();
         LoadedProgram program = loader.loadProgram("../output/fibonacci.bin");
@@ -56,6 +81,7 @@ public class BinaryLoaderTest {
     }
 
     @Test
+    @DisplayName("Test hello word program")
     void testHelloWorldLoadsCorrectly() {
         BinaryLoader loader = new BinaryLoader();
         LoadedProgram program = loader.loadProgram("../output/hello_world.bin");

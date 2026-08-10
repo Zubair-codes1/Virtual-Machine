@@ -135,7 +135,7 @@ public class CodeGenerator {
         }
         switch (statement.getTypeName().toLowerCase().trim()) {
             case "int", "bool", "boolean" -> emitInstruction("PUSH", "0");
-            case "string", "str" -> emitInstruction("PUSH_STR", "\"\"");
+            case "string" -> emitInstruction("PUSH_STR", "\" \"");
             default -> throw new CodeGenException(
                     "Code Generation Error: Invalid type: " + statement.getTypeName(),
                     statement.getLineNumber()
@@ -183,6 +183,8 @@ public class CodeGenerator {
             generateFuncDeclStmt(functionStmt, environment);
         } else if (statement instanceof PrintStatement printStmt) {
             generatePrintStmt(printStmt, environment);
+        } else if (statement instanceof InputStatement inputStmt) {
+            generateInputStmt(inputStmt, environment);
         } else {
             throw new CodeGenException(
                     "Code Generation Error: Invalid statement: " + statement,
@@ -445,6 +447,13 @@ public class CodeGenerator {
         } else {
             emitInstruction("PRINT");
         }
+    }
+
+    public void generateInputStmt(InputStatement inputStmt, Environment environment) {
+        emitInstruction("INPUT");
+
+        int localSlot = getLocalSlot(inputStmt.getVariable(), environment);
+        emitInstruction("STORE_LOCAL", String.valueOf(localSlot));
     }
 
     private void generateExpression(Expression expression, Environment environment) {

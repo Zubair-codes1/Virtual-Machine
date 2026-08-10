@@ -17,6 +17,7 @@ public enum TokenType {
     RETURN,
     BREAK,
     PRINT,
+    INPUT,
     TRUE,
     FALSE,
 

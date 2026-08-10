@@ -29,6 +29,7 @@ public class VirtualMachineTest {
         assertDoesNotThrow(vm::executeProgram);
     }
 
+
     @Test
     @DisplayName("Testing fibonacci for errors")
     void testFibonacciExecutesWithoutError() {

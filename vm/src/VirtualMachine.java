@@ -34,7 +34,7 @@ public class VirtualMachine {
         this.programCounter = 0;
         this.programStack = new Stack<>();
         this.callStack = new Stack<>();
-        this.heap = new byte[4000];
+        this.heap = new byte[5000];
         this.heapPointer = 0;
         this.programStorage = new ArrayList<>();
         this.executableInstructions = new ArrayList<>();
@@ -200,7 +200,7 @@ public class VirtualMachine {
                 Instruction instruction = fetchInstruction();
                 // The Null Safety Check
                 if (instruction == null) {
-                    throw new VirtualMachineException("Null Instruction at address " + programCounter + ". Is there a gap in your code?");
+                    throw new VirtualMachineException("Null Instruction at address " + programCounter + ".");
                 }
 
                 if (instruction.opcode().getScope().equals(ScopeCategory.LOCAL) && callStack.isEmpty()) {
@@ -218,7 +218,8 @@ public class VirtualMachine {
             System.err.println("\n[VM EXECUTION ERROR]: " + e.getMessage());
             printFunctionStackTrace();
         }catch (Exception e) {
-            System.err.println("[INTERNAL EXECUTION ERROR]: " + e.getMessage() + " at address " + programCounter + ".");
+            System.err.println("[INTERNAL EXECUTION ERROR]: " + e.getMessage() + " at line number " + programCounter + ".");
+            printFunctionStackTrace();
         } finally {
             isRunning = false;
         }
